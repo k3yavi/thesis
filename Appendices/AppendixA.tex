@@ -1,0 +1,166 @@
+% Appendix A
+
+\chapter{Appendix} % Main appendix title
+\label{appendix}
+
+\section{Parameters for mapping and alignment tools}
+\label{subsec:params}
+
+When \bt was run to produce alignment results, it was run with default parameters with the exception of \texttt{-k 200} and \texttt{--no-discordant}.  When timing \bt the the number of threads (\texttt{-p}) was set in accordance with what is mentioned in the relevant text, and the output was piped to \texttt{/dev/null}.  When \bt was used to produce alignment results for quantification with \texttt{RSEM}, \texttt{RSEM}'s \bt wrapper (with its default parameters) was used to generate alignments.
+
+When producing alignment results, \STAR was run with the following parameters: \texttt{--outFilterMultimapNmax 200 --outFilterMismatchNmax 99999 --outFilterMismatchNoverLmax 0.2 --alignIntronMin 1000 --alignIntronMax 0 --limitOutSAMoneReadBytes 1000000 --outSAMmode SAMUnosrted}.  Additionally, when timing \STAR, it was run with the number of threads (\texttt{--runThreadN}) specified in the relevant text and with the \texttt{--outSAMMode None} flag.
+
+
+To obtain the ``pseudo-alignments'' produces by \kallisto, it was run with the \texttt{--pseudobam} flag.
+
+When producing mapping results, \rapmap was run with the option \texttt{-m 200} to limit multi-mapping reads to 200 locations.  Additionally, when timing \rapmap, it was run with the number of threads (\texttt{-t}) specified in the relevant text and with the \texttt{-n} flag to suppress output.
+
+\section{Flux Simulator parameters}
+\label{subsec:flux_params}
+
+
+The Flux simulator dataset was generated using the following parameters:
+
+\begin{verbatim}
+  REF_FILE_NAME   Human_Genome
+  GEN_DIR     protein_coding.gtf
+
+  NB_MOLECULES    5000000
+  TSS_MEAN    50
+  POLYA_SCALE NaN
+  POLYA_SHAPE NaN
+
+  FRAG_SUBSTRATE  RNA
+  FRAG_METHOD UR
+  FRAG_UR_ETA     350
+
+  RTRANSCRIPTION  YES
+  RT_MOTIF default
+
+  GC_MEAN NaN
+  PCR_PROBABILITY 0.05
+  PCR_DISTRIBUTION default
+
+  FILTERING YES
+
+  READ_NUMBER 150000000
+  READ_LENGTH 76
+  PAIRED_END  YES
+  ERR_FILE    76
+  FASTA       YES
+\end{verbatim}
+
+
+The following parameters were used to produce noise reads:	
+
+\begin{verbatim}
+  PAIRED_END YES
+  REF_FILE_NAME noisy.gtf
+	
+  READ_LENGTH 76
+  PRO_FILE_NAME flux_simulator_noise_expression.pro
+  ERR_FILE 76
+  GEN_DIR Human_Genome/
+  SEQ_FILE_NAME noise_reads.bed
+  PCR_DISTRIBUTION none
+  POLYA_SCALE NaN 
+  FASTA YES 
+	
+  NB_MOLECULES 2000000
+  READ_NUMBER 34382441
+  UNIQUE_IDS YES 
+  POLYA_SHAPE NaN                                                                               
+\end{verbatim}
+
+\section{Mapping accuracy in the presence of noisy reads}
+\label{subsec:noise}
+
+\begin{figure*}[htb] \centering \includegraphics[width=0.5\textwidth]{{Avi.RPE.supfig.1}.pdf}
+\caption{Precision, recall and F1-score (top) and FDR (bottom) on the simulated dataset with noise, for the 4 different tools we consider.}
+\label{fig:noisy_read} 
+\end{figure*}
+
+We tested the effect of including background (i.e. noise) reads on the accuracy of the different mapping and alignment tools.  In this experiment, we sampled 9 million reads from the 48 million read simulated data set used in~\Cref{subsec:timing}. We then incorporated an additional 1 million ``noise'' reads from a simulated dataset generated with the Flux Simulator using a custom annotation. This noise annotation was created by constructing a single interval for each transcript, which contained the entire genomic range from the initial until the terminal exons (i.e. it contained all intervening intronic regions).  Thus, for each annotated transcript, the noise annotation contains a nascent, un-spliced version of this transcript. This model of noise was motivated from the observation of~\citep{gilbert2004elongator}, that some RNA-seq data (e.g. human brain tissue) contains reads potentially derived from nascent, un-spliced variants of expressed transcripts. 
+
+As shown in Supplementary Figure 1 we observe that, in the presence of noise, the precision for all the tools decreases slightly compared to the ``clean'', 48 million read dataset described in~\Cref{subsec:timing}. This is because some small fraction of noisy reads are assigned as false positives, as they map to the mature version of their corresponding transcript of origin that appears in the reference. Overall, however, the results follow a very similar trend both with and without noisy reads.  Specifically, \rapmap (\qm) performs almost identically to \bt, while \kallisto and \STAR yield very similar results --- somewhat under-performing \rapmap and \bt.  This clearly demonstrates that, in the presence of noisy reads, all of the tools degrade gracefully and still perform reasonably well, with no discernible difference between mapping and alignment-based tools.
+
+\section{Quantification results using TPM}
+\label{subsec:tpm_quant}
+
+In addition to computing the error metrics based on the estimated versus true number of reads originating from each transcript (as provided in~\Cref{tab:quant_perf}), we also evaluated the same metrics based instead on the TPM of each transcript.  That is, all of the metrics defined in~\Cref{subsec:quant_compare,subsec:error_def} remain the same, except that $x_i$ now denotes the true TPM value for transcript $i$ and $y_i$ denotes the estimated TPM of transcript $i$.  We note that the Flux Simulator provides neither effective lengths nor TPM estimates directly.  To obtain the ground truth TPM values for the Flux Simulator dataset, we first computed the effective length of each transcript (by convolving the characteristic function over the transcript with the \textit{true} fragment length distribution), and then computed the TPM value for each transcript using~\Cref{eqn:tpm}.  The results are generally similar to what was observed at the read level, except that TIGAR 2 seems to perform considerably worse under a number of metrics on the RSEM-sim dataset when considering the TPM measure of abundance. 
+
+\begin{table*}[hbtp]
+\centering
+\caption{Performance evaluation of different tools along with quasi enabled sailfish (q-Sailfish) with other tools on synthetic data generated by Flux simulator.}
+\label{tab:quant_perf_tpm_flux}
+\begin{tabulary}{2cm}{lrrrr}
+\toprule	
+% {} & \multicolumn{4}{c}{Flux simulation} & \multicolumn{4}{c}{RSEM-sim simulation} \\
+% \midrule
+{} &  Kallisto &  RSEM &  q-Sailfish &  Tigar 2 \\
+\midrule
+Proportionality corr. &      0.79 &          0.80 &              0.80 &   0.80\\
+Spearman corr.        &      0.69 &          0.73 &              0.71 &   0.60\\
+TPEF 		      &      0.87 &          0.88 &              0.84 &   0.94\\
+TPME 		      &      0.07 &          0.13 &              0.12 &  -0.40\\
+MARD    	      &      0.35 &          0.27 &              0.31 &   0.35\\
+wMARD 		      &      0.67 &          1.22 &              0.69 &   1.76\\
+\bottomrule
+\end{tabulary}
+\end{table*}
+
+\begin{table*}[hbtp]
+\centering
+\caption{Performance evaluation of different tools along with quasi enabled sailfish (q-Sailfish) with other tools on synthetic data generated by RSEM simulator.}
+\label{tab:quant_perf_tpm_rsem}
+\begin{tabulary}{2cm}{lrrrr}
+\toprule	
+% {} & \multicolumn{4}{c}{Flux simulation} & \multicolumn{4}{c}{RSEM-sim simulation} \\
+% \midrule
+{} &  Kallisto &  RSEM &  q-Sailfish &  Tigar 2 \\
+\midrule
+Proportionality corr. &0.94 &          0.96 &              0.94 &   0.93 \\
+Spearman corr.        &0.91 &          0.93 &              0.91 &   0.89 \\
+TPEF 		      &0.51 &          0.47 &              0.50 &   0.95 \\
+TPME 		      &0.00 &          0.00 &              0.00 &   0.21 \\
+MARD    	      &0.28 &          0.25 &              0.28 &   0.48 \\
+wMARD 		      &-0.74 &         -0.73 &             -0.74 &   0.12 \\
+\bottomrule
+\end{tabulary}
+\end{table*}
+
+\section{Error Metrics}
+\label{subsec:error_def}
+
+We define the error metrics reported in~\Cref{subsec:quant_compare} below, letting $x_i$ denote the true number of reads originating from transcript $i$ and $y_i$ denote the estimated number of reads.
+
+The relative error for transcript $i$ (RE$_i$) is given by $\mathrm{RE_i} = \frac{x_i - y_i}{x_i}$ and the error indicator for transcript $i$ (EI$_i$) is given by
+%
+\begin{equation}
+  \mathrm{EI_i} =
+  \begin{cases}
+    1 & \text{ if } \left|RE_i\right| > 0.1 \\
+    0 & \text{ otherwise }
+  \end{cases},
+  \label{eqn:tpeii}
+\end{equation}
+%
+and it is equal to $1$ if the estimated count for this truly expressed transcript (it is undefined, as is RE$_i$, when $x_i = 0$) differs from the true count by more than $10\%$.  Given RE$_i$ and EI$_i$, the aggregate true positive error fraction (TPEF) is defined as $\text{TPEF} = \frac{1}{\left|X^{+}\right|}  \sum_{i \in X^{+}} EI_i$. Here, $X^{+}$ is the set of ``truly expressed'' transcripts (those having at least $1$ read originating from them in the ground truth).  Similarly, the true positive median error is define as $\text{TPME} = \text{median}\left(\{\text{RE}_i\}_{i \in X^{+}}\right)$.
+Finally, the absolute relative difference for transcript $i$ (ARD$_i$) is defined as
+
+\begin{equation}
+  \text{ARD}_i =
+  \begin{cases}
+    0                                            & \text{ if } x_i + y_i  = 0 \\
+    \frac{\left|x_i - y_i\right|}{0.5 \left(x_i + y_i\right)} & \text{ otherwise }
+  \end{cases}.
+\end{equation}
+
+Consequently, the mean absolute relative difference (MARD) is defined as $\text{MARD} = \frac{1}{M} \sum_{i} \text{ARD}_i$, and the weighted mean absolute relative difference (wMARD) is defined as
+%
+\begin{equation}
+  \text{wMARD} = \sum_{i \in \text{ARD}^{+}}
+    \frac{\log\left(\max\left(x_i, y_i\right)\right) \text{ARD}_i}{M},
+\end{equation}
+%
+where, ARD$^{+} = \{i | ARD_i > 0\}$, and $M$ is the total number of transcripts.
