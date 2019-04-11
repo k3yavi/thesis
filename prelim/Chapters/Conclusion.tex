@@ -1,0 +1,35 @@
+% Chapter 1
+
+\chapter{Conclusion and Future Work} % Main chapter title
+
+\label{conclusion} % For referencing the chapter elsewhere, use \ref{Chapter1} 
+
+%----------------------------------------------------------------------------------------
+
+% Define some commands to keep the formatting separated from the content 
+% \newcommand{\keyword}[1]{\textbf{#1}}
+% \newcommand{\tabhead}[1]{\textbf{#1}}
+% \newcommand{\code}[1]{\texttt{#1}}
+% \newcommand{\file}[1]{\texttt{\bfseries#1}}
+% \newcommand{\option}[1]{\texttt{\itshape#1}}
+
+\section{Discussion \& Conclusion}
+
+In this study, we have argued for the usefulness of our novel approach, \qm, for mapping RNA-seq reads.  More generally, we suspect that read \textit{mapping}, wherein sequencing reads are assigned to reference locations, but base-to-base alignments are not computed, is a broadly useful tool.  The speed of traditional aligners like \bt and \STAR is limited by the fact that they must produce optimal alignments for each location to which a read is reported to align.
+
+In addition to showing the speed and accuracy of \qm directly, we apply it to a problem in transcriptome analysis. we have updated the Sailfish software to make use of the \qm information produced by \rapmap, rather than direct \kmer counts, for purposes of transcript-level abundance estimation.  This update improves both the speed and accuracy of Sailfish, and also reduces the complexity of its code base. We demonstrate, on synthetic data generated via two different simulators, that the resulting quantification estimates have accuracy comparable to state-of-the-art tools. 
+
+However, \rapmap is a stand-alone mapping program and need not be used only for the applications we describe here.  We expect that \qm will prove a useful and rapid alternative to alignment for tasks ranging from filtering large read sets (e.g. to check for contaminants or the presence or absence specific targets) to more mundane tasks like quality control and, perhaps, even to related tasks like metagenomic and metatranscriptomic classification and abundance estimation. We hope that the \qm concept, and the availability of \rapmap and the efficient and accurate mapping algorithms it exposes, will encourage the community to explore replacing alignment with mapping in the numerous scenarios where traditional alignment information is unnecessary for downstream analysis.
+
+\section{Future Work}
+
+The concept of \qm is fast, accurate and solves an important problem, read-mapping. Since the mapping approach is still new and unexplored, we are reaching out to find other biological applications where \rapmap can be useful. In the following section, we discuss some of the applications on which we are currently working. However, this is in no way an exhaustive list and we believe \rapmap has the capability to simplify many more biological analysis.
+
+\subsection{RapClust~\citep{srivastava2016accurate}}
+
+Estimating gene expression from RNA-seq reads is an especially challenging task when no reference genome is present. Typically, this problem is solved by performing \denovo assembly of the RNA-seq reads, and subsequently mapping these reads to the resulting contigs to estimate expression. Due to sequencing errors and artifacts, and genetic variation and repeats, \denovo assemblers often fragment individual isoforms into separately assembled contigs.  \citet{corset} argue that better differential expression results can be obtained in \denovo assemblies if contigs are first clustered into groups.  They present a tool, CORSET, to perform this clustering, and compare their approach to existing tools such as CD-HIT~\citep{fu2012cd}. CD-HIT compares the sequences (contigs) directly and clusters them by sequence similarity. CORSET, alternatively, aligns reads to contigs (allowing multi-mapping) and defines a distance between each pair of contigs based on the number of multi-mapping reads shared between them, and the changes in estimated expression inferred for these contigs under different conditions. Hierarchical agglomerative clustering is then performed on these distances to obtain a clustering of contigs.
+
+\rapmap can be used for the same task, by taking an approach similar to that of CORSET. By mapping the RNA-seq reads to the target contigs and simultaneously constructing collapsed classes over fragments we can construct a weighted undirected graph. Given this undirected graph that represents the pair-wise similarity between contigs, we can use the \textit{Markov Cluster Algorithm}~\citep{van2001graph} to cluster the graph. In fact, \rapmap-enabled clustering, as discussed in our recent paper~\citep{srivastava2016accurate}, appears to provide comparable or better clusterings than existing methods, and produces these clusterings much more quickly. In RapClust, we presented a fast and accurate methodology for the data-driven clustering of \denovo transcriptome assemblies. But, there are many interesting directions for future work on this problem, we believe that the quality of the resulting clusters could be improved through a data-driven selection of the appropriate cutoff parameters. Another potential improvement on the current methodology would be to adopt a more robust log fold-change test, that may be more accurate in separating contigs that do not originate from the same gene. Sailfish is capable of producing not only transcript-level abundances but also estimates of the variance of each predicted abundance via posterior Gibbs sampling or bootstraps. This variance information can be incorporated into the estimates of log fold-change differences to allow for increased precision in separating potential paralogs. While the existing method works well in the completely \denovo context (i.e. even when the genomes or transcriptomes of closely related organisms may not be available), integrating homology information, when available, has the potential to improve the clustering results (and provide meaningful biological annotations for the clusters). The best way to integrate this information is an exciting direction for future work.  
+
+\subsection{RapAlign}
+As discussed in~\Cref{salmon} by relaxing the problem of read-alignment to read-mapping we were able to devise fast methods like \qm. But, \rapmap has the capability to be developed as full read aligner. We are working on designing a method to retrieve base-to-base alignments from the mappings obtained by \rapmap. Specifically, we believe that multi-mapping alignments can be computed from the mappings at only a marginal extra cost, given RapMap's knowledge about similarities among the reference sequence being mapped to. Additionally, we are working on a compressed index to be used with \rapmap to work around the problem of the big index so that \rapmap can be used with very large reference sequences (e.g. thousands of genomes in a metagenomic/metatranscriptomic context).
