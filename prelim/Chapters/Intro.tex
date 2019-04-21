@@ -1,18 +1,17 @@
 % Chapter 1
 
 \chapter{Introduction} % Main chapter title
-
 \label{intro} % For referencing the chapter elsewhere, use \ref{Chapter1} 
 
 %----------------------------------------------------------------------------------------
 
-
+\section{Read Alignment}
 DNA sequencing is generally performed in three phases~\citep{schadt2010window}: fragmentation, physical-sequencing, and assembly. The first phase of fragmentation breaks the reference DNA into several small pieces and amplifies it into multiple copies, based on the requirements of the analysis. In the physical sequencing phase, individual units (called \textit{bases}) of the fragments are identified in the sequential order to create a read, the number of the contiguous sequence of bases in a read defines its length measured in base-pairs (bp). In the last phase of assembly, the collection of \reads (called \textit{library}) is analyzed by bioinformatics software to find overlapping regions in a \textit{library} of \reads and create "most of" the contiguous sequences of the genome. The phrase "most of" is particularly important because based on the species, sequencing technology, and many external factors sequencing can face many different biological and computational challenges and can give different results like collapsing the repetitive sequence of the genome.
 
 
 \begin{figure*}[!htb]
 \centering
-\includegraphics[width=0.6\textwidth]{{Avi.RPE.fig.4}.pdf}
+\includegraphics[width=0.6\textwidth]{rapmap/{Avi.RPE.fig.4}.pdf}
 \caption{From top to bottom: Single-End Sequencing, Paired-End Sequencing, information retained after Paired-End sequencing.}
 \label{fig:pe-seq}
 \end{figure*}
@@ -80,7 +79,7 @@ In the timeline of read-sequencing, sequencers started producing Terabytes of da
 
 \begin{figure*}
  \centering
- \includegraphics[width = 1.0\textwidth]{{Avi.RPE.fig.5}.png}
+ \includegraphics[width = 1.0\textwidth]{rapmap/{Avi.RPE.fig.5}.png}
   \caption{From Top to bottom~\citep{altfigure}. : DNA, RNA and mRNA.}
   \label{fig:alt-splicing}
 \end{figure*}
@@ -148,3 +147,5 @@ The introduction of lightweight-alignment further divided the transcriptome alig
 
 
 Using a different, alignment-free approach, a recent quantification tool \kallisto~\citep{Bray:2015:Kallisto} makes use of Transcriptome-de-Bruijn graph(T-DBG) to compute so-called pseudo-alignments. \kallisto builds a de-Bruijn graph on the transcriptome and labels each unique k-mer region on the graph with its constituent transcripts. During the pseudo-alignment stage, a procedure is used to extract a subset of k-mers from the read and intersect them with the T-DBG to determine a "compatible" set of transcripts. In some sense, pseudo-alignment goes even further than mapping in that the pseudo-alignments themselves give no information about where (position) or how (orientation) a read maps to a transcript (though pseudo-alignments can be pre-processed, at some extra cost to approximate this extra information). The field of read-mapping is under constant development and we have developed a novel mapping technique, called \qm, using the suffix array, which is discussed in the following section.
+
+\section{Quantification}

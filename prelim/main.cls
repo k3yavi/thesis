@@ -302,6 +302,19 @@ KOMA-script documentation for details.}]{fancyhdr}
 \newcommand{\MMP}[1][]{\ifthenelse{\equal{#1}{}}{\text{MMP}}{\text{MMP}\ensuremath{_#1}}\xspace}
 \newcommand{\denovo}{\textit{de novo}\xspace}
 
+%Commands from Alevin
+\newcommand{\comment}[1]{\textcolor{red}{#1}\xspace}
+\newcommand{\alevin}{alevin\xspace}
+\newcommand{\Alevin}{Alevin\xspace}
+\newcommand{\salmon}{Salmon\xspace}
+\newcommand{\cellr}{Cell-Ranger\xspace}
+\newcommand{\naive}{\textit{na\"ive}\xspace}
+\newcommand{\scrnaseq}{scRNA-seq\xspace}
+\newcommand{\dscrnaseq}{dscRNA-seq\xspace}
+\newcommand{\kbpipe}{kb-pipe\xspace}
+% \newcommand{\kallisto}{kallisto\xspace}
+\newcommand{\dropest}{dropEst\xspace}
+
 %Avi's
 \newcommand{\reads}{\textit{reads}\xspace}
 \newcommand{\ra}{read-alignment\xspace}
@@ -359,7 +372,7 @@ KOMA-script documentation for details.}]{fancyhdr}
 	% {\normalsize \facname \par} % Faculty name
 	% {\normalsize \deptname \par} % Department name
 	\bigskip
-	{\normalsize Research Proficiency Examination --- Report\par} % Degree name
+	{\normalsize Preliminary Examination --- Report\par} % Degree name
 	\bigskip
 	{\normalsize\bfseries \@title \par} % Thesis title
 	\medskip

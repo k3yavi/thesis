@@ -1,3 +1,5 @@
+.PHONY: all main.pdf
+
 all:  main.pdf
 
 main.pdf: main.tex main.bib
