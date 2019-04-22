@@ -304,16 +304,16 @@ KOMA-script documentation for details.}]{fancyhdr}
 
 %Commands from Alevin
 \newcommand{\comment}[1]{\textcolor{red}{#1}\xspace}
-\newcommand{\alevin}{alevin\xspace}
-\newcommand{\Alevin}{Alevin\xspace}
-\newcommand{\salmon}{Salmon\xspace}
-\newcommand{\cellr}{Cell-Ranger\xspace}
+\newcommand{\alevin}{\texttt{alevin}\xspace}
+\newcommand{\Alevin}{\texttt{Alevin}\xspace}
+\newcommand{\salmon}{\texttt{Salmon}\xspace}
+\newcommand{\cellr}{\texttt{Cell-Ranger}\xspace}
 \newcommand{\naive}{\textit{na\"ive}\xspace}
 \newcommand{\scrnaseq}{scRNA-seq\xspace}
-\newcommand{\dscrnaseq}{dscRNA-seq\xspace}
-\newcommand{\kbpipe}{kb-pipe\xspace}
+\newcommand{\dscrnaseq}{\texttt{dscRNA-seq}\xspace}
+\newcommand{\kbpipe}{\texttt{kb-pipe}\xspace}
 % \newcommand{\kallisto}{kallisto\xspace}
-\newcommand{\dropest}{dropEst\xspace}
+\newcommand{\dropest}{\texttt{dropEst}\xspace}
 
 %Avi's
 \newcommand{\reads}{\textit{reads}\xspace}
