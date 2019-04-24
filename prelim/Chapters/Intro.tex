@@ -166,12 +166,25 @@ All single cell protocols in general follows similar library preperation steps. 
   \label{fig:libprep}
 \end{figure*}
 
-\subsection{Fluidigm based protocols}
+\subsection{Fluidigm based platforms ~\citep{islam2012highly, hashimshony2012cel}}
 \label{intro:fluidigm}
 
 One of the earliest technique to capture and isolate single cells was based on microliter volume plates (microwell plates) \citep{islam2012highly, hashimshony2012cel}. Later it was automated through microfluidic platform from Fluidigm (C1 platform) \citep{islam2014}, typically in very small volumes of a few nano litre. The platform uses integrated fluidic circuit (IFC) array where a batch of cells are loadded through pipetting. The microfluidics system in the platforms separates the cells into different chambers which are called as wells. Earlier C1 platform uses a 96 well plate but more recently a 800 well plate has also been avaliable by Fluidigm. The C1 platform after capturing individual cells automatically washes, verify and lysis, perform reverse transcription and PCR amplify the collected cDNA; which is extracted and sequenced through Illumina sequencing.
 
 The C1 platform has provided range of opportunities for many experiments but has its own limitations. Some of the caveats associated with Fluidigm based experiments include relatively low throughput, in expectation higher per cell cost, and the size of ICF chip as it captures cells of a particular size in a single run. In contrast to plate-based capture methods, which usually provide reads along the full length of a molecule, an alternative droplet-based capture method \citep{dropseq, indrop, tenx} was proposed which trades-off full-length sequencing with higher throughput resulting in lesser per cell cost. In this study we are going to focus primarily on droplet based single cell RNA-sequencing (dscRNA-seq).
 
-\subsection{Droplet based protocols} 
+\subsection{Droplet based platforms ~\citep{dropseq, indrop, tenx}} 
 \label{intro:droplet}
+Droplet based platforms works by capturing cells in nanoliter-sized aqueous droplets by associating a different barcode with each cell’s RNAs, and sequencing them all together. Intially droplet based platforms were release as DIY systems but later automated and commercialized by 10x Genomics ~\citep{tenx} and their chromium platform.
+As discussed in [XXXXXXXXXXXXX LUKE's] all three platforms works in a similar fashion apart from how the beads are produced, when the droplets are broken and in some aspects of their chemistry. In ~\Cref{fig:dropprep} we show how the molecular barcoding is performed in one of the dscRNA-seq platform as proposed by ~\citep{dropseq}. In drop-seq platform, individual cells are dissociated from complex tissue which along with a flow of beads suspended in lysis buffer are encapsulated into nanoliter-sized emulsion droplets. Inside the droplet, the cells are lysed and its mRNAs bind to the primers on droplet's companion microparticle which is reverse-transcribed into cDNAs generating a set of beads. The droplets later break generating library for all cells in parallel in one single tube which are amplified in pools for high-throughput Illumina sequencing. 
+
+\begin{figure*}
+ \centering
+ \includegraphics[width = 1.0\textwidth]{alevin/dropseq.jpg}
+  \caption{Molecular Barcoding of Cellular Transcriptomes in Droplets \citep{dropseq}}
+  \label{fig:dropprep}
+\end{figure*}
+
+On each bead, oligo-dT primers has a covalently bounded UMI (Unique Molecule Identifier) and a unique, bead-specific cellular barcode (CB). Association of each individual molecule with a cell-unqiue UMI sequence before PCR amplification makes the platform particularly effective as only a small section at the 3' end of each molecule is sequenced. This has a monetory benefit of reducing the amount of cDNA that needs to be sequenced and therefore increasing the number of cells that can be sequenced at a time, at a similar cost. However, the trade-off of the coverage with throughtput comes at a cost of making this platform unsuitable for applications such as variant detection and de-novo assembly. Moreover, traditional pipelines for bulk RNA-seq quantification also cannot be directly used for dscRNA-seq quantification as datasets with CB/UMI need extra processing steps like CB whitelisting (the process of disambiguating droplets with real cells from empty/doublet containing droplets), UMI deduplication (the process of modeling PCR tree to deduplicate UMI sequences) which are non-trivial to model efficiently.
+
+A typical dscRNA-seq experiment contains a very small amount of RNA (\~ 10--30 pg) of which less than 5 percent of which is mRNA [XXXXXXXXXXXXX LUKE's]. The tiny sample size makes it difficult to process and necessiates PCR amplification step, however, the rate of amplification of each molecule in each cell is not controllable and creates an irregularity in the expression of the transcript and gene abundances. Along with CB whitelisting, a basic model of PCR tree for deduplication has been previously applied by various platform ~\citep{dropseq, tenx}. In ~\Cref{alevin} we propose a unified pipeline called \alevin where we describe an end-to-end quantification pipeline that takes as input sample-demultiplexed \texttt{FASTQ} files and outputs gene-level UMI counts for each cell in the library.
