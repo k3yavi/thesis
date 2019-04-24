@@ -24,7 +24,7 @@ Various methods have been proposed to correctly process \dscrnaseq barcodes in a
 
 \begin{table}[!htb]
 \centering
-\caption{The percentage of reads multi-mapping in bulk datasets from human and mouse. We use these datasets for various analyses throughout the manuscript. Note that this percentage varies depending on the read length as well as the overall quality of the dataset.}
+\caption{The percentage of reads multi-mapping in bulk datasets from human and mouse. We use these datasets for various analyses throughout the chapter. Note that this percentage varies depending on the read length as well as the overall quality of the dataset.}
       \begin{tabular}{cccc}
         \hline
            Species & Accession number & Read length & Percentage \\ \hline
@@ -32,7 +32,7 @@ Various methods have been proposed to correctly process \dscrnaseq barcodes in a
     Human & SRR1373442\citep{dvinge2014sample} & 49 & 9.2 \\
     Human & SRR1644186\citep{bouquet2016longitudinal} & 100 & 9.2 \\
     Human & SRR5074291\citep{shen2017screening} & 150 & 7.7 \\
-    Mouse & ERR435943\citep{schmitt2014high} & 75 & 23 \\
+    Mouse & ERR435943\citep{schmitt2014high} & 75 & 23.0 \\
     Mouse & SRR3532922\citep{saito2016nova2} & 125 & 10.6 \\
     Mouse & SRR6753775\citep{fratta2018mice} & 150 & 5.6 \\
     Mouse & SRR327047\citep{mouse_retina} & 120 & 5.2 \\ \hline
@@ -124,7 +124,7 @@ The \alevin program also outputs a tier matrix, of the same dimensions as the ce
   \item Genes associated with the remaining nodes in the graph are assigned tier 3. These are genes that have no unique evidence, and do not share reads (or, in fact, paths in the equivalence class graph) with another gene that has unique evidence. Hence, the EM algorithm will distribute reads between these genes in an essentially uniform manner, and their estimates are uninformative.  Their abundance signifies that some genes (at least 1) in this ambiguous family are expressed, but exactly which and their distribution of abundances cannot be determined. 
 \end{enumerate}
 
-\Alevin, optionally (using the \texttt{--numCellBootstraps} flag), also outputs bootstrap variance estimates for genes within each cell. These variance estimates could conceivably be used by downstream tools for dimensionality reduction, differential expression testing, or other tasks. 
+\Alevin, optionally (using the \texttt{{--}numCellBootstraps} flag), also outputs bootstrap variance estimates for genes within each cell. These variance estimates could conceivably be used by downstream tools for dimensionality reduction, differential expression testing, or other tasks. 
 
 \subsection{Final whitelisting (Optional)}
 \label{sec:final_whitelisting}
@@ -135,11 +135,11 @@ In the implementation of Petukhov et al.\citep{dropest}, a kernel density estima
 
 \begin{enumerate}  
 \item Fraction of reads mapped
-\item Fraction of mitochondrial reads (Optionally activated by \texttt{--mRNA} flag.)
-\item Fraction of rRNA reads (Optionally activated by \texttt{--rRNA} flag.)
+\item Fraction of mitochondrial reads (Optionally activated by \texttt{{--}mRNA} flag.)
+\item Fraction of rRNA reads (Optionally activated by \texttt{{--}rRNA} flag.)
 \item Duplication rate
 \item Mean gene counts post de-duplication
-\item The maximum correlation of gene-level quantification estimates with the high-quality CBs. (Optionally activated by \texttt{--useCorrelation} flag.)
+\item The maximum correlation of gene-level quantification estimates with the high-quality CBs. (Optionally activated by \texttt{{--}useCorrelation} flag.)
 \end{enumerate}
 
 
@@ -228,7 +228,7 @@ To show that the UMI deduplication algorithm from \alevin does, indeed, perform 
       \label{suptab:whitelist}
 \end{table}
 
-To assess the performance of \alevin, both in terms of accuracy in quantification and resource consumption, we ran it on 10x Chromium datasets from human and mouse. We compare our results against the \cellr pipeline\citep{tenx}, the \dropest pipeline\citep{dropest} \footnote{Note that we were not able to run the dropEstr Bayesian correction method and the results presented are after running just the \dropest pipeline~\cite{dropseqsrc}.}. , and a custom pipeline, with an external list of whitelisted CBs, using STAR\citep{star}, featureCounts \citep{featurecounts}, and UMI-tools \citep{umitools}, which we refer to as the \naive pipeline. The exact parameters for running each tool are provided under Materials and Methods. Note that we run \alevin with the \texttt{--keepDuplicates} flag during indexing, which ensures that even when multiple sequence-identical transcripts exist in the annotation, they are not discarded. This is to allow for fair comparison against the other tools, since they do not discard such transcripts, and the existence of such transcripts will impact the number of multimapping reads. However, we do not generally recommended using this flag when running \alevin. We observe that the number of final whitelisted cells predicted by \alevin are in close proximity to the count of cells predicted by \cellr (and \dropest, since they use the same whitelise), but there are non-trivial differences (\Cref{suptab:whitelist}). Comparison on data using the Drop-seq\citep{dropseq} protocol is also detailed below. Comparisons against the recently released version 3.0.0 of \cellr are also provided (Additional file 1: Figure S1), along with results from another run of \alevin using different parameters. Where mentioned, the results are stratified by gene uniqueness which is the proportion of k-mers, of size 31, that are not shared between two or more genes. We note that varying the k-mer size changes the stratification of the genes but does not impact the overall correlation and performance of the methods. We show this for the mouse neuronal 900 dataset (Additional file 1: Figure S2). We calculated this for each gene in the human (GENCODE release 27, GRCh38.p10) and mouse (GENCODE release M16, GRCm38.p5) transcriptomes. Note that this was not calculated using the canonicalized k-mers from the genes. This is because the \scrnaseq protocols are stranded and a read, therefore, can not multi-map between two genes if the reverse complement of one of them is shared with the other's forward sequence. 
+To assess the performance of \alevin, both in terms of accuracy in quantification and resource consumption, we ran it on 10x Chromium datasets from human and mouse. We compare our results against the \cellr pipeline\citep{tenx}, the \dropest pipeline\citep{dropest} \footnote{Note that we were not able to run the dropEstr Bayesian correction method and the results presented are after running just the \dropest pipeline~\cite{dropseqsrc}.}. , and a custom pipeline, with an external list of whitelisted CBs, using STAR\citep{star}, featureCounts \citep{featurecounts}, and UMI-tools \citep{umitools}, which we refer to as the \naive pipeline. The exact parameters for running each tool are provided under Materials and Methods. Note that we run \alevin with the \texttt{{--}keepDuplicates} flag during indexing, which ensures that even when multiple sequence-identical transcripts exist in the annotation, they are not discarded. This is to allow for fair comparison against the other tools, since they do not discard such transcripts, and the existence of such transcripts will impact the number of multimapping reads. However, we do not generally recommended using this flag when running \alevin. We observe that the number of final whitelisted cells predicted by \alevin are in close proximity to the count of cells predicted by \cellr (and \dropest, since they use the same whitelise), but there are non-trivial differences (\Cref{suptab:whitelist}). Comparison on data using the Drop-seq\citep{dropseq} protocol is also detailed below. Comparisons against the recently released version 3.0.0 of \cellr are also provided (Additional file 1: Figure S1), along with results from another run of \alevin using different parameters. Where mentioned, the results are stratified by gene uniqueness which is the proportion of k-mers, of size 31, that are not shared between two or more genes. We note that varying the k-mer size changes the stratification of the genes but does not impact the overall correlation and performance of the methods. We show this for the mouse neuronal 900 dataset (Additional file 1: Figure S2). We calculated this for each gene in the human (GENCODE release 27, GRCh38.p10) and mouse (GENCODE release M16, GRCm38.p5) transcriptomes. Note that this was not calculated using the canonicalized k-mers from the genes. This is because the \scrnaseq protocols are stranded and a read, therefore, can not multi-map between two genes if the reverse complement of one of them is shared with the other's forward sequence. 
 
 \subsection{Accuracy of estimates against bulk data}
 \begin{table}[!htb]
@@ -237,8 +237,8 @@ To assess the performance of \alevin, both in terms of accuracy in quantificatio
       \begin{tabular}{ccccc}
         \hline
            Dataset & \Alevin & \cellr & \naive & DropEst \\ \hline
-           Human PBMC 4k & 0.813 & 0.78 & 0.747 & 0.783 \\
-           Human PBMC 8k & 0.81 & 0.772 & 0.74 & 0.776 \\
+           Human PBMC 4k & 0.813 & 0.780 & 0.747 & 0.783 \\
+           Human PBMC 8k & 0.810 & 0.772 & 0.740 & 0.776 \\
            Mouse Neurons 900 & 0.812 & 0.773 & 0.761 & 0.779 \\
            Mouse Neurons 2k & 0.822 & 0.781 & 0.767 & 0.784\\
            Mouse Neurons 9k & 0.831 & 0.796 & 0.776 & 0.803 \\ \hline
