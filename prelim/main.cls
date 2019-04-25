@@ -301,7 +301,7 @@ KOMA-script documentation for details.}]{fancyhdr}
 \newcommand{\bt}{\texttt{Bowtie 2}\xspace}
 \newcommand{\MMP}[1][]{\ifthenelse{\equal{#1}{}}{\text{MMP}}{\text{MMP}\ensuremath{_#1}}\xspace}
 \newcommand{\denovo}{\textit{de novo}\xspace}
-
+\newcommand{\hsa}{SA\xspace}
 %Commands from Alevin
 \newcommand{\comment}[1]{\textcolor{red}{#1}\xspace}
 \newcommand{\alevin}{\texttt{alevin}\xspace}

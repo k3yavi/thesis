@@ -196,23 +196,20 @@ headsepline, % Uncomment to get a line under the header
 \addchaptertocentry{\abstractname} % Add the abstract to the table of contents
 
 RNA Sequencing (RNA-seq) technologies are evolving rapidly, and with them, the requirement 
-for fast and accurate tools to analyze the generated data. Both bulk and single cell sequencing
-
-
-The first step of many sequencing analyses requires us to solve the problem of \ra. When 
-reads are aligned to a collection of reference sequences that share a substantial amount 
-of sub-sequence (near or exact repeats), a single read can have many potential alignments, 
-and considering all such alignment can be crucial for downstream analysis like quantification.
-This study discusses the evolution of the tools developed to handle the problem of \ra for 
-next generation sequencing, their impact on RNA-seq analysis, introduce a novel concept, 
-\qm, and an efficient algorithm implementing this approach called \rapmap which maps RNA-seq 
-\reads (sequences) to the reference sequence(s) (transcriptome). By attempting only to report
-the potential loci of origin of a sequencing read, and not the base-to-base alignment by which 
-it derives from the reference, \rapmap is capable of \textit{mapping} sequencing reads to a 
-target transcriptome substantially faster than existing alignment tools. The algorithm we
-employ to implement \qm uses several efficient data structures and takes advantage of the 
-special structure of shared sequence prevalent in transcriptomes to rapidly provide 
-highly-accurate mapping information.
+for fast and accurate tools to analyze the generated data. The first step of many RNA-seq
+analyses requires us to solve the problem of \ra. When reads are aligned to a collection of 
+reference sequences that share a substantial amount of sub-sequence (near or exact repeats), 
+a single read can have many potential alignments, and considering all such alignment can be 
+crucial for downstream analysis like quantification. This study discusses the evolution of 
+the tools developed to handle the problem of \ra for next generation sequencing, their impact 
+on RNA-seq analysis, introduce a novel concept, \qm, and an efficient algorithm implementing 
+this approach called \rapmap which maps RNA-seq \reads (sequences) to the reference sequence(s) 
+(transcriptome). By attempting only to report the potential loci of origin of a sequencing read, 
+and not the base-to-base alignment by which it derives from the reference, \rapmap is capable of 
+\textit{mapping} sequencing reads to a target transcriptome substantially faster than existing 
+alignment tools. The algorithm we employ to implement \qm uses several efficient data structures 
+and takes advantage of the special structure of shared sequence prevalent in transcriptomes to 
+rapidly provide highly-accurate mapping information.
 
 Bulk RNA-sequencing is an established method to perform genome-wide quantification of gene 
 expressions. However, quantification tools for bulk RNA-seq cannot be directly used for 
