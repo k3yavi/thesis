@@ -200,7 +200,7 @@ for fast and accurate tools to analyze the generated data. The first step of man
 analyses requires us to solve the problem of \ra. When reads are aligned to a collection of 
 reference sequences that share a substantial amount of sub-sequence (near or exact repeats), 
 a single read can have many potential alignments, and considering all such alignment can be 
-crucial for downstream analysis like quantification. This study discusses the evolution of 
+crucial for downstream analysis like quantification. This dissertation discusses the evolution of 
 the tools developed to handle the problem of \ra for next generation sequencing, their impact 
 on RNA-seq analysis, introduce a novel concept, \qm, and an efficient algorithm implementing 
 this approach called \rapmap which maps RNA-seq \reads (sequences) to the reference sequence(s) 
@@ -211,8 +211,8 @@ alignment tools. The algorithm we employ to implement \qm uses several efficient
 and takes advantage of the special structure of shared sequence prevalent in transcriptomes to 
 rapidly provide highly-accurate mapping information.
 
-Bulk RNA-sequencing is an established method to perform genome-wide quantification of gene 
-expressions. However, quantification tools for bulk RNA-seq cannot be directly used for 
+While bulk RNA-sequencing is an established method to perform genome-wide quantification of gene 
+expressions, however, quantification tools for bulk RNA-seq cannot be directly used for 
 droplet based single cell RNA-sequencing (dscRNA-seq) data. We introduce alevin, a fast 
 end-to-end pipeline to process droplet-based single-cell RNA sequencing data, performing 
 cell barcode detection, read mapping, unique molecular identifier (UMI) deduplication, 
@@ -224,14 +224,14 @@ accuracy of gene abundance estimates. Alevin is considerably faster, typically 8
 than existing gene-quantification approaches, while also using less memory.
 
 Finally, we propose to study the effectiveness of both our methods and extend it further.
-\qm as concept is a novel but it trades-off speed with accuracy, which shows in 
+\qm is a novel concept but it trades-off speed with accuracy, which shows up in 
 \textit{relatively} complicated datasets. In our preliminary study for the extention of 
 \qm, we extensively explore the idea of selectively aligning (SA) reads based on
-their genotypic nature and optimize \rapmap for efficient dynamic dataset dependent speed
-and accurcay tradeoff. \Alevin utilizes \rapmap for transcriptome mapping and improved
-mapping would be directly reflected on the performance of \alevin. Moreover, we propose
-a principled approach and study the affect of further extending \alevin's UMI 
-deduplication algorithm to include unspliced RNA.
+their genotype and optimize \rapmap for efficient, dynamic (dataset dependent) speed / accurcay 
+tradeoff. As \alevin utilizes \rapmap for transcriptome mapping, improved
+mapping would be directly reflected on the performance of dscRNA-seq quantification. 
+Moreover, we propose a principled approach and study the affect of further extending 
+\alevin's UMI deduplication algorithm to include unspliced RNA.
 
 \end{abstract}
 
@@ -243,38 +243,38 @@ deduplication algorithm to include unspliced RNA.
 \addchaptertocentry{\acknowledgementname} % Add the acknowledgements to the table of contents
 
 My experience as a Ph.D. student at Stony Brook has been life changing as it has helped me 
-grow both personally and professionally. A big fraction of this is due to my advisor, 
+grow both personally and professionally. A big fraction of that is due to my advisor, 
 Rob Patro, whom I'd like to thank for his patience, guidance and encouragement for letting 
-me explore the field of computational biology has I did not had any previous experience. 
-Working with him, has been very exciting; He taught me how to do science and his vision 
+me explore the field of computational biology as I did not had any previous experience. 
+Working with him, has been very exciting as he taught me how to do science. His vision 
 and tenaciousness to work and improve the RNA-seq quantification has helped me learn, 
 how looking at a problem from many different angles generate exciting new ideas. I also 
 feel, his love for statically-typed programmed programming languages has helped me realize 
 the importance of designing efficient tools which I hope to keep for the rest of my career.
 
 I'd like to thank other members of my committee, Steve Skiena and Michael Bender whose 
-important contributions through various lectures, talks and feedback on this thesis has 
+important contributions through various lectures, talks and feedback on this dissertation has 
 been pivotal for my cademic development while at Stony Brook university. I'm honored to 
 have them as my committee members.
 
 I'm very grateful to my colleagues and it was an exciting experience to learn and grow
 alongside them over the years. In particular Laraib Malik, Hirak sarkar, Mohsen Zakeri
-and Fatemeh Almodaresi made Combine-Lab an interesting place to work and provide
-insightful discussions. I couldn't imagine working through all the paper-deadlines
+and Fatemeh Almodaresi made Combine-Lab an interesting place to work as they helped me by 
+providing insightful discussions. I can't imagine working through all the paper deadlines,
 had been more enjoyable and pleasant experience without them. I'd also like to thank Mike Love, 
 Charlotte Soneson, Geet Duggal, Richard Smith-Unna, Owen Dando, Darya Filipova, Patrick Marks 
 and Paul Ryvkin for their insightful discussions regarding various aspects of the work.
 
 I couldn't thank enough to my family for their support throughout my journey of learning. 
-Specially my father, Y K Srivastav, who guided from my childhood to learn and motivated me 
-to think out-of-box. I'd like to thank my mother Ritima Srivastav, brother Prakhar Srivastava,
-late grand parents, Govind Prasad Srivastava, Savitri Srivastava and all cousins brother and
+Specially my father, Y K Srivastava, who guided me from my childhood to learn and motivate me 
+to think out-of-box. I'd like to thank my mother Ritima Srivastava, brother Prakhar Srivastava,
+late grand parents, Govind Prasad Srivastava, Savitri Srivastava and all my cousins brother and
 sister for providing comfortable and loving environment they provided for me growing up. 
 
 At last, I would also like to thank Stony Brook Research Computing and 
 Cyberinfrastructure, and the Institute for Advanced Computational Science at Stony Brook 
 University for access to the high-performance SeaWulf computing system, which was made 
-possible by a $\$1.4$M National Science Foundation grant (\#1531492).
+possible by a National Science Foundation grant (\#1531492).
 \end{acknowledgements}
 
 %----------------------------------------------------------------------------------------

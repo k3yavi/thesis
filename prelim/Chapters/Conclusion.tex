@@ -118,9 +118,9 @@ transcriptome (using Bowtie2~\citep{bowtie2}) and quantifications based upon
 mapping to the genome and subsequently projecting these alignments into
 transcriptomic coordinates (using STAR~\citep{star}).
 
-Finally, we plan to introduce an improved mapping algorithm, selective alignment (\hsa),
+Finally, we introduce an improved mapping algorithm, selective alignment (\hsa),
 that is designed to remain fast, while simultaneously eliminating many of the
-mapping errors made by lightweight approaches. Our proposed method increases
+mapping errors made by lightweight approaches. Our proposed method will increase
 both the sensitivity and specificity of fast read mapping. It relies upon
 alignment scoring to help differentiate between mapping loci that would
 otherwise be indistinguishable due to, for example, similar exact matches along
@@ -139,7 +139,10 @@ a higher accuracy, in part because of considering a substantially larger number
 of reads. Further, \alevin is considerably faster and uses less memory than
 these other approaches. The optimizations used in \alevin makes it possible to 
 efficiently process \dscrnaseq datasets in a reduced computational burden for 
-processing and re-processing of \dscrnaseq data.
+processing and re-processing of \dscrnaseq data. In addition to that, we are reaching out to 
+find other single cell platforms where \alevin can be useful. 
+In the following section, we discuss some of the applications, which we have worked on, 
+or are currently working.
 
 \subsection{Supplementary Study}
 \subsubsection{Swish ~\citep{zhu2019nonparametric}}
