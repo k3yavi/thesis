@@ -52,7 +52,7 @@ intermediate files - usually on the order of a few megabytes - even when process
 of millions of reads.
 
 \subsection{Future Study}
-\subsubsection{Selective Alignment}
+\subsubsection{Selective Alignment (2019 - ready with preprint)}
 
 Since its introduction in 2008~\citep{lister,nagalakshmi,mortazavi2008mapping}, transcriptome
 profiling via RNA-seq has become a popular and widely-used technique to profile gene-
@@ -89,22 +89,59 @@ differences are often obscured when analyzing simulated data, since aspects of
 experimental data that can lead to substantial divergence in quantification
 estimates are not properly recapitulated in simulation.
 
-We will focus on one aspect of abundance estimation, namely the
-effect of read mapping on the resulting transcript quantification estimates. 
-We will explore that the differences in how reads are aligned or mapped can lead to
-considerable differences in the predicted abundances.
+We focus on the effect of read
+mapping on the resulting transcript quantification estimates. To compare the
+effect of different alignment and mapping methods in RNA-seq transcript
+quantification and related downstream analysis we have picked tools from three
+different categories of mapping strategies: unspliced alignment of RNA-seq reads
+directly to the transcriptome, spliced alignment of RNA-seq reads to the
+annotated genome (with subsequent projection to the transcriptome), and
+(unspliced) lightweight mapping (\qm) of the RNA-seq reads directly to the
+transcriptome. While numerous different lightweight mapping approaches
+exist~\citep{sailfish,rnaskim,kallisto,rapmap,fleximer}, and the degree to
+which they diverge from alignment-based methods can differ, a key feature
+shared by such approaches is that they do not validate predicted fragment mappings
+via an alignment score, which precludes them from discerning loci where the best mappings 
+would not admit a reasonable-scoring alignment (i.e., spurious mappings). Furthermore, 
+the focus on speed means that such methods tend not to explore sub-optimal mapping loci, 
+despite the fact that such loci might admit the best alignment scores and therefore be 
+the most likely origin for a fragment. We show that differences in how reads are aligned 
+or mapped can lead to considerable differences in the predicted abundances. Specifically, we
+find that lightweight mapping approaches, which are generally highly
+concordant with traditional alignment approaches in simulated data, can lead to
+quite different abundance estimates from alignment-based methods in experimental
+data. These differences happen across a large number
+of samples, but the magnitude of the differences can vary substantially from sample to sample. We
+also find that these differences appear even when exactly the same optimization procedure
+is used to infer transcript abundances, and are instead a result of the different
+mapping and alignment approaches returning distinct, and sometimes even
+disjoint, mapping loci for certain reads.
 
-Finally, we plan to introduce an improved mapping algorithm, selective alignment (\hsa),
+It is somewhat difficult to categorically specify which approaches produce more accurate 
+estimates in experimental data, due to the absence of a ground truth. However,
+we argue that the divergence of lightweight mapping approaches from traditional
+alignment is usually the result of a failure of the greedy heuristics adopted by
+lightweight approaches, which are explicitly adopted to maximize the speed of
+such methods.This further explores and provides evidence for a hypothesis, raised
+in~\citet{selaln} and ~\citet{heraem}, that lightweight mapping approaches may suffer from
+spurious mappings leading to a decrease in the resulting quantification
+accuracy. We also demonstrate that, even among alignment-based approaches,
+non-trivial differences arise between quantifications based upon mapping to the
+transcriptome (using Bowtie2~\citep{bowtie2}) and quantifications based upon
+mapping to the genome and subsequently projecting these alignments into
+transcriptomic coordinates (using STAR~\citep{star}).
+
+Finally, we introduce an improved mapping algorithm, selective alignment (\hsa),
 that is designed to remain fast, while simultaneously eliminating many of the
-mapping errors made by lightweight approaches. Our proposed method will increase
+mapping errors made by lightweight approaches. Our proposed method increases
 both the sensitivity and specificity of fast read mapping. It relies upon
 alignment scoring to help differentiate between mapping loci that would
 otherwise be indistinguishable due to, for example, similar exact matches along
 the reference. Our approach also determines when even the best mapping for a
 read exhibits insufficient evidence that the read truly originated from the
-locus in question, allowing it to avoid spurious mappings. We will benchmark this
+locus in question, allowing it to avoid spurious mappings. We benchmark this
 approach on both simulated data and a broad collection of experimental
-RNA-seq samples, and demonstrate that it leads to considerably improved
+RNA-seq samples, and demonstrate that it leads to improved
 concordance with the abundance estimates obtained via quantification following
 traditional alignment to the transcriptome.
 
