@@ -1,0 +1,257 @@
+% Chapter 1
+
+\chapter{RapMap ~\citep{rapmap}} % Main chapter title
+
+\label{rapmap} % For referencing the chapter elsewhere, use \ref{Chapter1} 
+
+%----------------------------------------------------------------------------------------
+
+% Define some commands to keep the formatting separated from the content 
+% \newcommand{\keyword}[1]{\textbf{#1}}
+% \newcommand{\tabhead}[1]{\textbf{#1}}
+% \newcommand{\code}[1]{\texttt{#1}}
+% \newcommand{\file}[1]{\texttt{\bfseries#1}}
+% \newcommand{\option}[1]{\texttt{\itshape#1}}
+
+\section{Background} \label{sec:background}
+The bioinformatics community has put tremendous effort into building a wide array of different tools to solve the read-alignment problem efficiently.  These tools use many different strategies to quickly find potential alignment locations for reads; for example, Bowtie~\citep{bowtie}, \bt~\citep{bowtie2}, BWA~\citep{bwa} and BWA-mem~\citep{bwamem} use variants of the FM-index, while tools like the Subread aligner~\citep{liao2013subread}, Maq~\citep{maq} and MrsFast~\citep{mrsfast} use \kmer-based indices to help align reads efficiently.  Because read alignment is such a ubiquitous task, the goal of such tools is often to provide accurate results as quickly as possible.  Indeed, recent alignment tools like \STAR~\citep{star} demonstrate that rapid alignment of sequenced reads is possible, and tools like HISAT~\citep{hisat} demonstrate that this speed can be achieved with only moderate memory usage. When reads are aligned to a collection of reference sequences that share  a substantial amount of sub-sequence (near or exact repeats), a single read can have many potential alignments, and considering all such alignment can be crucial for downstream analysis (e.g. considering all alignment locations for a read within a transcriptome for the purpose of quantification~\cite{li2011rsem}, or when attempting to cluster \textit{de novo} assembled contigs by shared multi-mapping reads~\citep{corset}). However, reporting multiple potential alignments for each read is a difficult task, and tends to substantially slow down even very efficient alignment tools.
+
+Yet, in many cases, all of the information provided by the alignments is not necessary.  For example, in the transcript analysis tasks mentioned above, simply the knowledge of the transcripts and positions to which a given read maps well is sufficient to answer the questions being posed. In support of such ``analysis-oriented'' computation, we propose a novel concept, called \qm, and an efficient algorithm implementing \qm (exposed in the software tool \rapmap) to solve the problem of mapping sequenced reads to a target transcriptome. This algorithm is \textit{considerably} faster than state-of-the-art aligners, and achieves its impressive speed by exploiting the structure of the transcriptome (without requiring an annotation), and eliding the computation of full-alignments (e.g. \texttt{CIGAR} strings). Further, our algorithm produces mappings that meet or exceed the accuracy of existing popular aligners under different metrics of accuracy.  Finally, we demonstrate how the mappings produced by \rapmap can be used in the downstream analysis task of transcript-level quantification from RNA-seq data, by modifying the Sailfish~\citep{sailfish} tool to take advantage of quasi-mappings, as opposed to raw \kmer counts, for transcript quantification. We also demonstrate how quasi-mappings can be used to effectively cluster contigs from \denovo assemblies.  We show that the resulting clusterings are of comparable or superior accuracy to those produced by recent methods such as CORSET~\citep{corset}, but that they can be computed \textit{much} more quickly using \qm.
+
+\section{Materials and Methods} \label{sec:methods}
+
+The \qm concept, implemented in the tool \rapmap, is a new mapping technique to allow the rapid and accurate mapping of sequenced fragments (single or paired-end reads) to a target transcriptome.  \rapmap exploits a combination of data structures --- a hash table, suffix array (SA), and efficient rank data structure.  It takes into account the special structure present in transcriptomic references, as exposed by the suffix array, to enable ultra-fast and accurate determination of the likely loci of origin of a sequencing read.  Rather than a standard alignment, \qm produces what we refer to as fragment \textit{mapping} information. In particular, it provides, for each query (fragment), the reference sequences (transcripts), strand and position from which the query may have likely originated.  In many cases, this mapping information is sufficient for downstream analysis. For example, tasks like transcript quantification, clustering of \denovo assembled transcripts, and filtering of potential target transcripts can be accomplished with this mapping information.  However, this method does not compute the base-to-base alignment between the query and reference.  Thus, such mappings may not be appropriate in every situation in which alignments are currently used (e.g. variant detection).
+
+We note here that the concept of \qm shares certain motivations with the notions of lightweight-alignment~\citep{salmon} and pseudo-alignment~\citep{kallisto}.  Yet, all three concepts --- and the algorithms and data structures used to implement them --- are distinct and, in places, substantially different.  Lightweight-alignment scores potential matches based on approximately consistent chains of super-maximal exact matches shared between the query and targets. Therefore, it typically requires some more computation than the other methods, but allows the reporting of a score with each returned mapping and a more flexible notion of matching.  Pseudo-alignment, as implemented in \kallisto, refers only to the process of finding \textit{compatible} targets for reads by determining approximately matching paths in a colored De Bruijn graph of a pre-specified order.  Among compatible targets, extra information concerning the mapping (e.g. position and orientation) can be extracted \textit{post-hoc}, but this requires extra processing, and the resulting mapping is no longer technically a pseudo-alignment.  \Qm seeks to find the \textit{best} mappings (targets and positions) for each read, and does so (approximately) by finding minimal collections of dynamically-sized, right-maximal matching contexts between target and query positions.  The algorithm for \qm that we describe below achieves this using a combination of a k-mer lookup table and a generalized suffix array.  While each of these approaches provide some insight into the problems of alignment and mapping, they represent distinct concepts and exhibit unique characteristics in terms of speed and accuracy, as demonstrated below\footnote{We do not compare against lightweight-alignment here, as no stand-alone implementation of this approach is currently available}.
+
+
+
+\begin{figure*}
+ \centering
+ \includegraphics[width = 0.8\textwidth]{rapmap/{Avi.RPE.fig.1}.pdf}
+  \caption{The transcriptome (consisting of transcripts $t_1,\ldots ,t_6$) is converted into a $\$$-separated string, $T$, upon which a suffix array, \SA{T}, and a hash table, $h$, are constructed. The mapping operation begins with a \kmer (here, $k=3$) mapping to an interval $\interval{b}{e}$ in \SA{T}.  Given this interval and the read, \MMP[i] and \NIP{\MMP[i]} are calculated as described in section \ref{sec:methods}. The search for the next hashable \kmer begins $k$ bases before \NIP{\MMP[i]}. }
+  \label{fig:overview}
+\end{figure*}
+
+\subsection{An algorithm for Quasi-mapping} \label{sec:overview} 
+The algorithm we use for \qm makes use of two main data structures, the generalized suffix array
+~\citep{Manber:1993:Suffix} \SA{T} of the transcriptome $T$, and a hash table $h$ mapping each \kmer occurring in $T$ to its suffix array interval (by default $k = 31$).  Additionally, we must maintain the original text $T$ upon which the suffix array was constructed, and the name and length of each of the original transcript sequences.  $T$ consists of a string in which all transcript sequences are joined together with a special separator character.  Rather than designating a separate terminator $\$_{i}$ for each reference sequence in the transcriptome, we make use of a single separator $\$$, and maintain an auxiliary rank data structure which allows us to map from an arbitrary position in the concatenated text to the index of the reference transcript in which it appears.  We use the rank9b algorithm and data structure of~\citet{Vigna:2008:Broadword} to perform the rank operation quickly.
+
+\Qm determines the mapping locations for a query read $r$ through repeated application of (1) determining the next hash table \kmer that starts past the current query position, (2) computing the maximum mappable prefix (MMP) of the query beginning with this \kmer, and then (3) determining the next informative position (NIP) by performing a longest common prefix (LCP) query on two specifically chosen suffixes in the suffix array.
+
+The algorithm begins by hashing the \kmers of $r$, from left-to-right (a symmetric procedure can be used for mapping the reverse-complement of a read), until some \kmer $k_i$ --- the \kmer starting at position $i$ within the read --- is present in $h$ and maps to a valid suffix array interval. We denote this interval as $\ival{k_i} = \interval{b}{e}$. Because of the lexicographic order of the suffixes in the suffix array, we immediately know that this \kmer is a prefix of all of the suffixes appearing in the given interval.  However, it may be possible to extend this match to some longer substring of the read beginning with $k_i$. In fact, the longest substring of the read that appears in the reference and is prefixed by $k_i$ is exactly the maximum mappable prefix (MMP)~\citep{star} of the suffix of the read beginning with $k_i$.  We call this maximum mappable prefix \MMP[i], and note that it can be found using a slight variant of the standard suffix array binary search~\citep{Manber:1993:Suffix} algorithm.  For speed and simplicity, we implement the ``simple accelerant'' binary search variant of~\citet{Gusfield}.  Since we know that any substring that begins with $k_i$ must reside in the interval \interval{b}{e}, we can restrict the \MMP[i] search to this region of the suffix array, which is typically very small.
+
+After determining the length of \MMP[i] within the read, one could begin the search for the next mappable suffix array interval at the position following this MMP. However, though the current substring of the read will differ from all of the reference sequence suffixes at the base following \MMP[i], the suffixes occurring at the lower and upper bounds of the suffix array interval corresponding to \MMP[i] may not differ from each other (See \Cref{fig:overview}).  That is, if $\ival{\MMP[i]} = \interval{b'}{e'}$ is the suffix array interval corresponding to \MMP[i], it is possible that $\left|\LCP{\T{\SA{b'}}}{\T{\SA{{e'-1}}}}\right| > \length{\MMP[i]}$.  In this case, it is most likely that the read and the reference sequence bases following \MMP[i] disagree as the result of a sequencing error, not because the (long) MMP discovered between the read and reference is a spurious match.  Thus, beginning the search for the next MMP at the subsequent base in the read may not be productive, since the matches for this substring of the query may not be informative --- that is, such a search will likely return the same (relative) positions and set of transcripts.  To avoid querying for such substrings, we define and make use of the notion of the next informative position (NIP). For a maximum mappable prefix \MMP[i], with $\ival{\MMP[i]} = \interval{b'}{e'}$, we define $\NIP{\MMP[i]} = \left|\LCP{\T{\SA{b'}}}{\T{\SA{{e'-1}}}}\right| + 1$.  Intuitively, the next informative position of prefix \MMP[i] is designed to return the next position in the query string where a suffix array search is likely to yield a set of transcripts different from those contained in $\ival{\MMP[i]}$.  To compute the longest common prefix between two suffixes when searching for the NIP, we use the ``direct min'' algorithm of~\citet{Ilie:2010:Longest}.  We found this to be the fastest approach. Additionally, it doesn't require the maintenance of an LCP array or other auxiliary tables aside from the standard suffix array.
+
+Given the definitions we have explained above, we can summarize the \qm procedure as follows (an illustration of the mapping procedure is provided in~\Cref{fig:overview}). First, a read is scanned from left to right (a symmetric procedure can be used for mapping the reverse-complement of a read) until a \kmer $k_i$ is encountered that appears in $h$. A lookup in $h$ returns the suffix array interval $\ival{k_i}$ corresponding to the substring of the read consisting of this \kmer.  Then, the procedure described above is used to compute \MMP[i] and $\ell = \NIP{\MMP[i]}$.  The search procedure then advances to position $i + \ell - k$ in the read, and again begins hashing the \kmers it encounters.  This process of determining the MMP and NIP of each processed \kmer and advancing to the next informative position in the read continues until the next informative position exceeds position $l_r - k$ where $l_r$ is the length of the read $r$. The result of applying this procedure to a read is a set $S = \{\left(q_0, o_0, \interval{b_0}{e_0}\right), \left(q_1, o_1, \interval{b_1}{e_1}\right), \dots \}$ of query positions, MMP orientations, and suffix array intervals, with one such triplet corresponding to each MMP.
+
+%revison text
+%reviewer #1 comments
+The final set of mappings is determined by a consensus mechanism. Specifically, the algorithm reports the intersection of transcripts appearing in all hits --- i.e. the set of transcripts that appear (in a consistent orientation) in every suffix array interval appearing in $S$. These transcripts, and the corresponding strand and location on each, are reported as \textit{\qm}\textit{s} of this read. These mappings are reported in a \texttt{samtools}-compatible format in which the relevant information (e.g. target id, position, strand, pair status) is computed from the mapping. We note that alternative consensus mechanisms, both more and less stringent, are easy to enforce given the information contained in the hits (e.g. enforcing that the hits are co-linear with respect to both the query and reference).  However, below, we consider this simple consensus mechanism. 
+%%%%%%%%%%%%%
+
+%reviewer #3 comments
+Intuitively, \rapmap's combination of speed and accuracy result from the manner in which it exploits the nature of exactly repeated sequence that is prevalent in transcriptomes (either as a result of alternative splicing or paralogous genes).  In addition to efficient search for MMPs and NIPs, the suffix array allows \rapmap to encode exact matches between the query and many potential transcripts very efficiently (in the form of ``hits'').  This is because all reference locations for a given MMP appear in consecutive entries of the suffix array, and can be encoded efficiently by simply recording the suffix array interval corresponding to this MMP. By aggressively filtering the hits to determine the set of ``best'' matching transcripts and positions, \rapmap is able to quickly discard small matches that are unlikely to correspond to a correct mapping. Similarly, the large collection of exact matches that appear in the reported mapping are very likely to appear in the alignment mapping (were the actual alignments to be computed).  In some sense, the success of the strategy adopted by \rapmap further validates the claim of ~\citet{liao2013subread} that the  seed-and-vote paradigm can be considerably more efficient than the seed-and-extend paradigm, as \rapmap adopts neither of these paradigms directly, but its approach is more similar to the former than the latter.
+
+In the next section, we analyze how this algorithm for \qm, as described above, compares to other aligners in terms of speed and mapping accuracy.
+%%%%%%%%%%%%%
+
+\section{Results} \label{sec:results}
+
+To test the practical performance of \qm, we compared \rapmap against a number of existing tools, and analyzed both the speed and accuracy of these tools on synthetic and experimental data. Benchmarking was performed against the popular aligners \bt~\citep{bowtie2} (v2.2.6) and \STAR~\citep{star} (v2.5.0c) and the recently-introduced pseudo-alignment procedure used in the quantification tool \kallisto~\citep{kallisto} (v0.42.4).  All experiments were scripted using Snakemake~\citep{koster2012building} and performed on a 64-bit linux server with 256GB of RAM and 4 x 6-core Intel Xeon E5-4607 v2 CPUs running at 2.60GHz. Wall-clock time was recorded using the \texttt{time} command.
+
+In our testing we find that \bt generally performs well in terms of reporting the true read origin among its set of multi-mapping locations.  However, it takes considerably longer and tends to return a larger set of multi-mapping locations than the other methods. In comparison to \bt, \STAR is \textit{substantially} faster but somewhat less accurate. \rapmap achieves accuracy comparable or superior to \bt, while simultaneously being much faster than even \STAR. \kallisto is similar to (slightly slower than) \rapmap in terms of single-threaded speed, and exhibits accuracy very similar to that of \STAR.  For both \rapmap and \kallisto, simply writing the output to disk tends to dominate the time required for large input files with significant multi-mapping (though we eliminate this overhead when benchmarking).  This is due, in part, to the verbosity of the standard \texttt{SAM} format in which results are reported, and suggests that it may be worth developing a more efficient and succinct output format for mapping information.
+
+\subsection{Speed and accuracy on synthetic data}
+\label{subsec:timing}
+
+To test the accuracy of different mapping and alignment tools in a scenario where we know the true origin of each read, we generated data using the Flux Simulator~\citep{fluxsim}.  This synthetic dataset was generated for the human transcriptome from an annotation taken from the ENSEMBL~\citep{ensembl} database consisting of $86,090$ transcripts corresponding to protein-coding genes.  The dataset consists of $\sim48$ million $76$ base pair, paired-end reads.  The detailed parameters used for the Flux Simulator can be found in~\Cref{subsec:flux_params}.
+
+\begin{figure} \centering \includegraphics[width=0.45\textwidth]{rapmap/{Avi.RPE.fig.2}.pdf}
+\caption{The time taken by \bt, \STAR and \rapmap to process the synthetic data using varying numbers of threads. \rapmap processes the data substantially faster than the other tools, while providing results of comparable or better accuracy.}
+\label{fig:runtime_benchmarking} \end{figure}
+
+When benchmarking these methods, reads were aligned directly to the transcriptome, rather than to the genome. This was done because we wish to benchmark the tools in a manner that is applicable when the reference genome may not even be known (e.g. in \denovo transcriptomics).  The parameters of \STAR (see~\Cref{subsec:params}) were adjusted appropriately for this purpose (e.g. to dis-allow introns etc.). Similarly, \bt was also used to align reads directly to the target transcriptome; the parameters for \bt are given in~\Cref{subsec:params}.
+
+\subsubsection{Mapping speed}
+
+We wish to measure, as directly as possible, just the time required by the mapping algorithms of the different tools.  Thus, when benchmarking the runtime of different methods, we do not save the resulting alignments to disk. Further, to mitigate the effect of ``outliers'' (a small number of reads which map to a very large number of low-complexity reference positions), we bound the number of different transcripts to which a read can map to be $200$.
+
+Additionally, we have also benchmarked \kallisto, but have not included the results in~\Cref{fig:runtime_benchmarking}, as the software, unlike the other methods, does not allow multi-threaded execution if mappings are being reported. Thus, we ran \kallisto with a single thread, using the \texttt{--pseudobam} flag and redirecting output to \texttt{/dev/null} to avoid disk overhead. \kallisto requires 17.87m to map the 48M simulated reads, which included $<$1m of quantification time. By comparison, \rapmap required 11.65m to complete with a single thread.
+
+Finally, we note \kallisto, \STAR and \rapmap require 2-3$\times$ the memory of \bt, but all of the methods tested here exhibit reasonable memory usage. The synthetic set of 48 million reads can be mapped to an index of the entire human transcriptome on a typical laptop with 8 GB of RAM.
+
+\begin{table}
+\caption{Accuracy of aligners/mappers under different metrics}
+\centering
+\begin{tabular}{lrrrr}
+\toprule
+{} &          \bt &     \kallisto &        \rapmap &         \STAR \\
+\midrule
+reads aligned &  47579567  &  44804857 &  47613536 &  44711604 \\
+recall        &        97.41 &        91.60 &        97.49 &        91.35 \\
+precision     &        98.31 &        97.72 &        98.48 &        97.02 \\
+F1-score      &        97.86 &        94.56 &        97.98 &        94.10 \\
+FDR           &         1.69 &         2.28 &         1.52 &         2.98 \\
+hits per read &         5.98 &         5.30 &         4.30 &         3.80 \\
+\bottomrule
+\end{tabular}
+\label{tab:performance_table}
+\end{table}
+
+As~\Cref{fig:runtime_benchmarking} illustrates, \rapmap out-performs both \bt and \STAR in terms of speed by a substantial margin, and finishes mapping the reads with a single thread faster than \STAR and \bt with $10$ threads. We consider varying the number of threads used by \rapmap and \STAR to demonstrate how performance scales with the number of threads provided.  On this dataset, \rapmap quickly approaches peak performance after using only a few threads.  We believe that this is not due to limits on the scalability of \rapmap, but rather because the process is so quick that, for a dataset of this size, simply reading the index constitutes a large (and growing) fraction of the total runtime (dotted line) as the number of threads is increased.  Thus, we believe that the difference in runtime between \rapmap and the other methods may be even larger for datasets consisting of a very large number of reads, where the disk can reach peak efficiency and the multi-threaded input parser (we use the parser from the Jellyfish~\citep{jellyfish} library) can provide input to \rapmap quickly enough to make use of a larger number of threads. Since running \bt with each potential number of threads on this dataset is very time-consuming, we only consider \bt's runtime using $10$ threads.
+
+
+\begin{figure*}[!htb]
+\centering
+\includegraphics[width=0.80\textwidth]{rapmap/{Avi.RPE.fig.3}.pdf}
+\caption{Mapping agreement between subsets of \bt, \STAR, \kallisto and \rapmap.}
+\label{fig:conc_plot}
+\end{figure*}
+
+\subsubsection{Mapping accuracy}
+\label{subsec:synth_accuracy}
+
+Since the Flux Simulator records the true origin of each read, we make use of this information as ground truth data to assess the accuracy of different methods. However, since a single read may have multiple, equally-good alignments with respect to the transcriptome, care must be taken in defining accuracy-related terms appropriately.  A read is said to be correctly mapped by a method (a true positive) if the set of transcripts reported by the mapper for this read contains the true transcript.  A read is said to be incorrectly mapped by a method (a false positive) if it is mapped to some set of 1 or more transcripts, none of which are the true transcript of origin.  Finally, a read is considered to be incorrectly un-mapped by a method (a false negative) if the method reports no mappings, but the transcript of origin is in the reference. Given these definitions, we report precision, recall, F1-Score and false discovery rate (FDR) in~\Cref{tab:performance_table} using the standard definitions of these metrics.  Additionally, we report the average number of ``hits-per-read'' (hpr) returned by each of the methods.  Ideally, we want a method to return the smallest set of mappings that contains the true read origin.  However, under the chosen definition of a true positive mapping, the number of reported mappings is not taken into account, and a result is considered a true positive so long as it contains the actual transcript of origin.  The hpr metric allows one to assess how many \textit{extra} mappings, on average, are reported by a particular method.
+
+As expected, \bt --- perhaps the most common method of directly mapping reads to transcriptomes --- performs very well in terms of precision and recall.  However, we find that \rapmap yields very similar (in fact, slightly better) precision and recall.  \STAR and \kallisto obtain similar precision to \bt and \rapmap, but have lower recall.  \STAR and \kallisto perform similarly in general, though \kallisto achieves a lower (better) FDR than \STAR.  Taking the F1-score as a summary statistic, we observe that all methods perform reasonably well, and that, in general, alignment-based methods do not seem to be more accurate than mapping-based methods. We also observe that \rapmap yields very accurate mapping results that match or exceed those of \bt.
+
+Additionally, we tested the impact of noisy reads (i.e. reads not generated from the indexed reference) on the accuracy of the different mappers and aligners. To create these background reads, we use a model inspired by~\citep{gilbert2004elongator}, in which reads are sampled from nascent, un-spliced transcripts. The details of this experiment are included in ~\Cref{subsec:noise}.
+
+\subsection{Speed and concordance on experimental data}
+
+We also explore the concordance of \rapmap with different mapping and alignment approaches using experimental data from the study of~\citet{cho2014high} (NCBI GEO accession \texttt{SRR1293902}).  The sample consists of $\sim26$ million $75$ base-pair, paired-end reads sequenced on an Illumina HiSeq.
+
+Since we do not know the true origin of each read, we have instead examined the agreement between the different tools (see ~\Cref{fig:conc_plot}). Intuitively, two tools agree on the mapping locations of a read if they align / map this read to the same subset of the reference transcriptome (i.e. the same set of transcripts). More formally, we define the elements of our universe, $\mathcal{U}$, to be tuples consisting of a read identifier and the set of transcripts returned by a particular tool.  For example, if, for read $r_i$, tool $A$ returns alignments to transcripts $\{t_1, t_2, t_3\}$ then $e_{Ai} = \left(r_i, \{t_1, t_2, t_3\}\right) \in \mathcal{U}$.  Similarly, if tool $B$ maps read $r_i$ to transcripts $\{t_2, t_3, t_4\}$ then $e_{Bi} = \left(r_i, \{t_2, t_3, t_4\}\right) \in \mathcal{U}$. Here, tools $A$ and $B$ do not agree on the mapping of read $r_i$. Given a universe $\mathcal{U}$ thusly-defined, we can employ the normal notions of set intersection and difference to explore how different subsets of methods agree on the mapping locations of the sequenced reads.  These concordance results are presented in~\Cref{fig:conc_plot}, which uses a bar plot to show the size of each set of potential intersections between the results of the tools we consider. In \Cref{fig:conc_plot} the dot matrix below the bar plot identifies the tools whose results are intersected to produce the corresponding bar. Tools producing mappings and alignments are denoted with black and red dots and bars respectively. The left bar plot shows the size of the unique tuples produced by each tool (alignments / mappings that do not match with any other tool). The right bar plot shows the total number of tuples produced by each tool, and well as the concordance among all different subsets of tools. 
+
+Under this measure of agreement, \rapmap and \kallisto appear to agree on the exact same transcript assignments for the largest number of reads. Further, \rapmap and \kallisto have the largest pairwise agreements with the aligners (\STAR and \bt) --- that is, the traditional aligners exactly agree more often with these tools than with each other.  It is important to note that one possible reason we see (seemingly) low agreement between \bt and other methods is because the transcript alignment sets reported by \bt are generally larger (i.e. contain more transcripts) than those returned by other methods, and thus fail to qualify under our notion of agreement.  This occurs, partially, because \rapmap and \kallisto (and to some extent \STAR) do not tend to return sub-optimal multi-mapping locations.  However, unlike \texttt{Bowtie 1}, which provided an option to return only the best ``stratum'' of alignments, there is no way to require that \bt return only the best multi-mapping locations for a read. We observe similar behavior for \bt (i.e. that it returns a larger set of mapping locations) in the synthetic tests as well, where the average number of hits per read is higher than for the other methods (see~\Cref{tab:performance_table}).  In terms of runtime, \rapmap, \STAR and \bt take $3$, $26$, and $1020$ minutes respectively to align the reads from this experiment using $4$ threads.  We also observed a similar trend in terms of the average number of hits per read here as we did in the synthetic dataset.  The average number of hits per read on this data were $4.56$, $4.68$, $4.21$, $7.97$ for \rapmap, \kallisto, \STAR and \bt respectively.
+
+\vspace{-0.2in}
+\section{Application of \qm for transcript quantification}
+\label{sec:quantification}
+
+%% We need to introduce the idea here
+While mapping cannot act as a stand-in for full alignments in all contexts, one problem where similar approaches have already proven very useful is transcript abundance estimation.  Recent work~\citep{sailfish,rnaskim,kallisto,salmon} has demonstrated that full alignments are not necessary to obtain accurate quantification results.  Rather, simply knowing the transcripts and positions where reads may have reasonably originated is sufficient to produce accurate estimates of transcript abundance.  Thus, we have chosen to apply \qm to transcript-level quantification as an example application, and have implemented our modifications as an update to the Sailfish~\citep{sailfish} software, which we refer to as \quasiSF.  These changes are present in the Sailfish software from version \texttt{0.7} forward.  Here, we compare this updated method to the transcript-level quantification tools RSEM~\citep{li2010rna}, Tigar2~\citep{tigar2} and \kallisto~\citep{kallisto}, the last of which is based on the pseudo-alignment concept mentioned above.
+
+\subsection{Transcript quantification}
+
+In an RNA-seq experiment, the underlying transcriptome consists of $M$ transcripts and their respective counts. The transcriptome can be represented as a set $\mathcal{X} = \{(t_1,\ldots,t_M),(c_1,\ldots,c_M)\}$, where $t_i$ denotes the nucleotide sequence of transcript $i$ and $c_i$ denotes the number of copies of $t_i$ in the sample. The length of transcript $t_i$ is denoted by $l_i$. Under ideal, uniform, sampling conditions (i.e. without considering various types of experimental bias), the probability of drawing a fragment from a transcript $t_i$ is proportional to its nucleotide fraction~\citep{li2010rna} denoted by $\eta_i = \frac{c_i l_i }{\sum_{j=1}^M c_j l_j}$.
+
+If we normalize the $\eta_i$ for each transcript by its length $l_i$, we obtain a measure of the relative abundance of each transcript called the transcript fraction~\citep{li2010rna}, which is given by $\tau_i = \frac{\frac{\eta_i}{l_i}}{\sum_{j=1} \frac{\eta_i}{l_i}}$.
+
+When performing transcript-level quantification, $\bm{\eta}$ and $\bm{\tau}$ are generally the quantities we are interested in inferring.  Since they are directly related, knowing one allows us to directly compute the other.  Below, we describe our approach to approximating the estimated number of reads originating from each transcript, from which we estimate $\bm{\tau}$ and, subsequently transcripts per million (TPM).
+
+\subsection{\Qm-based Sailfish}
+
+Using the \qm procedure provided by \rapmap as a library, we have updated the Sailfish \citep{sailfish} software to make use of quasi-mapping, as opposed to individual \kmer counting, for transcript-level quantification. In the updated version of Sailfish, the \texttt{index} command builds the quasi-index over the reference transcriptome as described in~\Cref{sec:methods}. Given the index and a set of sequenced reads, the \texttt{quant} command quasi-maps the reads and uses the resulting mapping information to estimate transcript abundances.
+
+To reduce the memory usage and computational requirements of the inference procedure, \quasiSF reduces the mapping information to a set of equivalence classes over sequenced fragments.  These equivalence classes are similar to those used in~\citet{isoem}, except that the position of each fragment within a transcript is not considered when defining the equivalence relation.  Specifically, any fragments that map to exactly the same set of transcripts are placed into the same equivalence class. Following the notation of~\citet{salmon}, the equivalence classes are denoted as $\bm{\mathcal{C}} = \{\mathcal{C}^{1}, \mathcal{C}^{2}, \dots \}$, and the count of fragments associated with equivalence class $\mathcal{C}^{j}$ is given by $d^j$.  Associated with each equivalence class $\mathcal{C}^{j}$ is an ordered collection of transcript identifiers $\mathbf{t}^{j} = \left(t_{j1}, t_{j2}, \dots\right)$ which is simply the collection of transcripts to which all equivalent fragments in this class map.  We call $\mathbf{t}^{j}$ the \textit{label} of class $\mathcal{C}^{j}$.
+
+\subsubsection{Inferring transcript abundances}
+
+The equivalence classes $\bm{\mathcal{C}}$ and their associated counts and labels are used to estimate the number of fragments originating from each transcript.  The estimated count vector is denoted by $\bm{\alpha}$, and $\alpha_i$ is the estimated number of reads originating from transcript $t_i$. In \quasiSF, we use the variational Bayesian expectation maximization (VBEM) algorithm to infer the parameters (the estimated number of reads originating from each transcript) that maximize a variational objective.  Specifically, we maximize a simplified version of the variational objective of~\citet{tigar}.
+
+\begin{table*}
+\centering
+\caption{Performance evaluation of different tools along with quasi enabled sailfish (q-Sailfish) with other tools on synthetic data generated by Flux simulator / RSEM simulator.}
+\label{tab:quant_perf}
+\begin{tabulary}{2cm}{lrrrr}
+\toprule
+% {} & {Flux / RSEM-sim simulations}  \\
+\midrule
+{} &  Kallisto &  RSEM &  q-Sailfish &  Tigar 2 \\
+\midrule
+Proportionality corr. &      0.74/0.91 &          0.78/0.93 &              0.75/0.91 &   0.77/0.93 \\
+Spearman corr. &      0.69/0.91 &          0.73/0.93 &              0.70/0.91 &   0.72/0.93 \\
+TPEF &      0.77/0.53 &          0.96/0.49 &              0.60/0.53 &   0.59/0.50 \\
+TPME &     -0.24/0.00 &         -0.37/-0.01 &             -0.10/0.00 &  -0.09/0.00 \\
+MARD &      0.36/0.29 &          0.29/0.25 &              0.31/0.29 &   0.26/0.23 \\
+wMARD &      4.68/1.00 &          5.23/0.88 &              4.45/1.01 &   4.35/0.94 \\
+\bottomrule
+\end{tabulary}
+\end{table*}
+
+The VBEM update rule can be written as a simple iterative update in terms of the equivalence classes, their counts, and the prior ($\alpha_0$).  The iterative update rule for the VBEM is:
+
+\begin{equation}
+\alpha_i^{u+1}  = \alpha_0 + \sum_{\mathcal{C}^j \in \mathcal{C}} d_j \left(
+\frac{e^{\gamma_i^{u}} \frac{1}{\hat{l_i}}} {\sum_{t_k \in \mathbf{t}^j}
+e^{\gamma_k^{u}} \frac{1}{\hat{l_k}}} \right),
+\label{eqn:vbem_update}
+\end{equation}
+
+where
+
+\begin{equation}
+\gamma_i^{u} = \Psi(\alpha_0 + \alpha_i^u) - \Psi(\sum_{k} \alpha_0 + \alpha_k^u)
+\label{eqn:em_update}
+\end{equation}
+
+and $\Psi(\cdot)$ is the digamma function. Here, $\hat{l_i}$ is the \textit{effective} length of transcript $t_i$, computed as in~\citet{li2010rna}.  To determine the final estimated counts --- $\bm{\alpha}$ ---~\Cref{eqn:vbem_update} is iterated until convergence.  The estimated counts are considered to have converged when no transcript has estimated counts differing by more than one percent between successive iterations.
+
+Given $\bm{\alpha}$, we compute the TPM for transcript $i$ as
+
+\begin{equation}
+  TPM_i = 10^6 \frac{\frac{\alpha_i}{\hat{l_i}}}{\sum_{j}\frac{\alpha_j}{\hat{l_j}}}.
+\label{eqn:tpm}
+\end{equation}
+
+Sailfish outputs, for each transcript, its name, length, effective length, TPM and the estimated number of reads originating from it.
+
+\subsection{Quantification performance comparison}
+\label{subsec:quant_compare}
+
+We compared the accuracy of quasi-Sailfish (Sailfish v0.9.0; q-Sailfish in~\Cref{tab:quant_perf}) to the transcript-level quantification tools RSEM~\citep{li2010rna} (v1.2.22), Tigar 2~\citep{tigar2} (v2.1), and \kallisto~\citep{kallisto} (v0.42.4) using 6 different accuracy metrics and data from two different simulation pipelines. One of the simulated datasets was generated with the Flux Simulator~\citep{fluxsim}, and is the same dataset used in~\Cref{sec:results} to assess mapping accuracy and performance on synthetic data.  The other dataset was generated using the RSEM simulator via the same methodology adopted by~\citet{kallisto}.  That is, \text{RSEM} was run on sample \texttt{NA12716\_7} of the Geuvadis RNA-seq data~\citep{Lappalainen2013Transcriptome} to learn model parameters and estimate true expression. The learned model was then used to generate the simulated dataset, which consists of $30$ million $75$~bp paired-end reads.
+
+We measure the accuracy of each method based on the estimated versus true number of reads originating from each transcript, and consider 6 different metrics of accuracy; proportionality correlation~\citep{Lovell2015Proportionality}, Spearman correlation, the true positive error fraction (TPEF), the true positive median error (TPME), the mean absolute relative difference (MARD) and the weighted mean absolute relative difference (wMARD). Detailed definitions for the last four metrics are provided in~\Cref{subsec:error_def}. 
+
+Each of these metrics captures a different notion of accuracy, and all are reported to provide a more comprehensive perspective on quantifier accuracy.  The first two metrics --- proportionality and Spearman correlation --- provide a global notion of how well the estimated and true counts agree, but are fairly coarse measures. The TPEF assesses the fraction of transcripts where the estimate is different from the true count by more than some nominal fraction (here $10\%$).  Unlike TPEF, the TPME metric takes into account the direction of the mis-estimate (i.e. is it an over or under-estimate of the true value?).  However, both metrics are assessed only on truly-expressed transcripts, and so provide no insight into the tendency of a quantifier to produce false positives.
+
+The absolute relative difference (ARD) metric has the benefit of being defined on all transcripts as opposed to only those which are truly expressed and ranges from $0$ (lowest) to $2$ (highest).  Since the values of this metric are tightly bounded, the aggregate metric, MARD, is not dominated by high expression transcripts.  Unfortunately, it therefore has limited ability to capture the magnitude of  mis-estimation.  The wMARD metric attempts to account for the magnitude of mis-estimation, while still trying to ensure that the measure is not completely dominated by high expression transcripts.  This is done by scaling each ARD$_i$ value by the logarithm of the expression.
+
+\Cref{tab:quant_perf} shows the performance of all $4$ quantifiers, under all $6$ metrics, on both datasets.  While all methods seem to perform reasonably well, some patterns emerge.  RSEM seems to perform very well in terms of the correlation metrics, but less well in terms of the TPEF, TPME, and wMARD metrics (specifically in the Flux Simulator-generated dataset).  This is likely a result of the lower mapping rate obtained on this data by RSEM's very strict \bt parameters.  Tigar 2 generally performs very well under a broad range of metrics, and produces highly-accurate results.  However, it is \textit{by far} the slowest method considered here, and requires over a day to complete on the Flux simulator data and almost 7 hours to complete on the RSEM-sim data given $16$ threads (and not including the time required for \bt alignment of the reads).  Finally, both \quasiSF and \kallisto perform well in general under multiple different metrics, with \quasiSF tending to produce somewhat more accurate estimates.  Both of these methods also completed
+in a matter of minutes on both datasets.
+
+One additional pattern that emerges is that the RSEM-sim data appears to present a much simpler inference problem compared to the Flux Simulator data.  One reason for this may be that the RSEM-sim data is very ``clean'' --- yielding concordant mapping rates well over $99\%$, even under RSEM's strict \bt mapping parameters.  As such, all methods tend to perform well on this data, and there is comparatively little deviation between the methods under most metrics.
+
+For completeness, we also provide (in~\Cref{subsec:tpm_quant}) the results, under all of these metrics, where the true and predicted abundances are considered in terms of TPM rather than number of reads.  We find that the results are generally similar, with the exception that TIGAR 2 performs considerably worse under the TPM measure.
+
+\vspace{-0.1in}
+\section{Application of quasi-mapping for clustering \denovo assemblies}
+%
+\begin{table}[h]
+  \caption{Performance of CORSET, CD-HIT and \rapmap enabled clustering (R-CL) on yeast and human data}
+  \label{tab:clust_perf}
+  \resizebox{\columnwidth}{!}{%
+\begin{tabulary}{1cm}{lrrr|rrr}
+\toprule
+{} & \multicolumn{3}{c}{Human} & \multicolumn{3}{c}{Yeast} \\
+\midrule
+{} & CORSET & CD-HIT & R-CL &  CORSET & CD-HIT & R-CL \\
+\midrule
+
+precision  & 0.96  & 0.96 & 0.95  & 0.36 & 0.41 & 0.36 \\
+recall     & 0.56  & 0.37 & 0.60  & 0.63 & 0.36 & 0.71 \\
+time (min) & 957      & 268     & 8     & 23     & 5     & 2 \\
+\bottomrule
+\end{tabulary}
+}
+\end{table}
+%
+Estimating gene-expression from RNA-seq reads is an especially challenging task when no reference genome is present. Typically, this problem is solved by performing \denovo assembly of the RNA-seq reads, and subsequently mapping these reads to the resulting contigs to estimate expression. Due to sequencing errors and artifacts, and genetic variation and repeats, \denovo assemblers often fragment individual isoforms into separate assembled contigs.  \citet{corset} argue that better differential expression results can be obtained in \denovo assemblies if contigs are first clustered into groups.  They present a tool, CORSET, to perform this clustering, and compare their approach to existing tools such as CD-HIT~\citep{fu2012cd}. CD-HIT compares the sequences (contigs) directly, and clusters them by sequence similarity. CORSET, alternatively, aligns reads to contigs (allowing multimapping) and defines a distance between each pair of contigs based on the number of multimapping reads shared between them, and the changes in estimated expression inferred for these contigs under different conditions. Hierarchical agglomerative clustering is then performed on these distances to obtain a clustering of contigs.
+
+Here, we show how \rapmap can be used for the same task, by taking an approach similar to that of CORSET.  First, we map the RNA-seq reads to the target contigs and simultaneously construct equivalence classes over the mapped fragments as in~\Cref{sec:quantification}. We construct a weighted, undirected graph from these equivalence classes as follows. Given a set of contigs $\mathbf{c}$ and the equivalence classes $\mathcal{C}$, we construct $G=(V,E)$ such that $V = \mathbf{c}$, and $E = \{\{u,v\} \mid \exists j: u,v \in \mathbf{t}^{j}\}$.  We define the weight of edge $\{u, v\}$ as $w(u,v) = \frac{R_{u,v}}{\min\left(R_u,R_v\right)}$. Here $R_u$ is the total number of reads belonging to all equivalences classes in which contig $u$ appears in the label. $R_v$ is defined analogously. $R_{u,v}$ is the total sum of reads in all equivalence classes for which contigs $u$ and $v$ appear in the label. Given the undirected graph $G$, we use the \textit{Markov Cluster Algorithm}, as implemented in MCL~\citep{van2000cluster}, to cluster the graph.
+
+To benchmark the time and accuracy of our clustering scheme compared to CD-HIT and CORSET, we used two datasets from the CORSET paper~\citep{corset}. The first dataset consists of $231$ million human reads in total, across two conditions, each with three replicates (as originally described by~\citet{trapnell2013differential}). The second dataset, from yeast, was originally published by~\citet{nookaew2012comprehensive} and consists $36$ million reads, grown in two different conditions with three replicates each. For both of these datasets, we consider clustering the contigs of the corresponding \denovo assemblies, which were generated using Trinity~\citep{trinity}.
+
+To measure accuracy, we consider the precision and recall induced by a clustering with respect to the true genes from which each contig originates.  Assembled contigs were mapped to annotated transcripts using BLAT~\citep{kent2002blat}, and labeled with their gene of origin. A pair of contigs from the same cluster is regarded as true positive (tp) if they are from the same gene in the ground truth set. Similarly, a pair is a false positive (fp) if they are not from same gene but are clustered together.  A pair is a false negative (fn) if they are from same gene but not predicted to be in the same cluster and all the remaining pairs are true negatives (tn). With these definitions of tp, fp, tn and fn we can define precision and recall in standard manner. As shown in \Cref{tab:clust_perf}, when considering both precision and recall, \rapmap (quasi-mapping) enabled clustering performs substantially better than CD-HIT and similar to CORSET. \rapmap enabled clustering takes 8 minutes and 2 minutes to cluster the human and yeast datasets respectively --- which is substantially faster than the other tools. To generate the timing results above, CD-HIT was run with 25 threads. The time recorded for CORSET consists of both the time required to align the reads using \bt (using 25 threads) and the time required to perform the actual clustering, which is single threaded.  The time recorded for \rapmap enabled clustering consists of the time required to quasi-map the reads, build the equivalence classes and construct the graph (using 25 threads), plus the time required to cluster the graph with MCL (using a single thread). Overall, on these datasets, \rapmap-enabled clustering appears to provide comparable or better clusterings than existing methods, and produces these clusterings much more quickly.
+
+
+\section{Conclusion}
+In this chapter we have argued for the usefulness of our novel approach, \qm, for mapping RNA-seq reads.  More generally, we suspect that read \textit{mapping}, wherein sequencing reads are assigned to reference locations, but base-to-base alignments are not computed, is a broadly useful tool.  The speed of traditional aligners like \bt and \STAR is limited by the fact that they must produce optimal alignments for each location to which a read is reported to align.
+
+In addition to showing the speed and accuracy of \qm directly, we apply it to two problems in transcriptome analysis. First, we have updated the Sailfish software to make use of the \qm information produced by \rapmap, rather than direct \kmer counts, for purposes of transcript-level abundance estimation.  This update improves both the speed and accuracy of Sailfish, and also reduces the complexity of its codebase. We demonstrate, on synthetic data generated via two different simulators, that the resulting quantification estimates have accuracy comparable to state-of-the-art tools. We also demonstrate the application of \rapmap to the problem of clustering \denovo assembled contigs, a task that has been shown to improve expression quantification and downstream differential expression analysis~\citep{corset}. \rapmap can produce clusterings of comparable or superior accuracy to those of existing tools, and can do so much more quickly.
+
+However, \rapmap is a stand-alone mapping program, and need not be used only for the applications we describe here.  We expect that \qm will prove a useful and rapid alternative to alignment for tasks ranging from filtering large read sets (e.g. to check for contaminants or the presence or absence specific targets) to more mundane tasks like quality control and, perhaps, even to related tasks like metagenomic and metatranscriptomic classification and abundance estimation.
+
+We hope that the \qm concept, and the availability of \rapmap and the efficient and accurate mapping algorithms it exposes, will encourage the community to explore replacing alignment with mapping in the numerous scenarios where traditional alignment information is un-necessary for downstream analysis.
