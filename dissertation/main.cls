@@ -264,6 +264,7 @@ KOMA-script documentation for details.}]{fancyhdr}
 \newcommand*{\examinerO}[1]{\def\examinerOname{#1}}
 \newcommand*{\examinerT}[1]{\def\examinerTname{#1}}
 \newcommand*{\examinerTh}[1]{\def\examinerThname{#1}}
+\newcommand*{\examinerJr}[1]{\def\examinerJrname{#1}}
 \newcommand*{\degree}[1]{\def\degreename{#1}}
 \renewcommand*{\author}[1]{\def\authorname{#1}}
 \newcommand*{\addresses}[1]{\def\addressname{#1}}
