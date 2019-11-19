@@ -8,7 +8,10 @@
 
 When \bt was run to produce alignment results, it was run with default parameters with the exception of \texttt{-k 200} and \texttt{--no-discordant}.  When timing \bt the the number of threads (\texttt{-p}) was set in accordance with what is mentioned in the relevant text, and the output was piped to \texttt{/dev/null}.  When \bt was used to produce alignment results for quantification with \texttt{RSEM}, \texttt{RSEM}'s \bt wrapper (with its default parameters) was used to generate alignments.
 
-When producing alignment results, \STAR was run with the following parameters: \texttt{--outFilterMultimapNmax 200 --outFilterMismatchNmax 99999 --outFilterMismatchNoverLmax 0.2 --alignIntronMin 1000 --alignIntronMax 0 --limitOutSAMoneReadBytes 1000000 --outSAMmode SAMUnosrted}.  Additionally, when timing \STAR, it was run with the number of threads (\texttt{--runThreadN}) specified in the relevant text and with the \texttt{--outSAMMode None} flag.
+When producing alignment results, \STAR was run with the following parameters: \texttt{--outFilterMultimapNmax 200 --outFilterMismatchNmax 99999}\\
+\texttt{--outFilterMismatchNoverLmax 0.2 --alignIntronMin 1000} \\
+\texttt{ --alignIntronMax 0 --limitOutSAMoneReadBytes 1000000} \\ 
+\texttt{--outSAMmode SAMUnosrted}.  Additionally, when timing \STAR, it was run with the number of threads (\texttt{--runThreadN}) specified in the relevant text and with the \texttt{--outSAMMode None} flag.
 
 
 To obtain the ``pseudo-alignments'' produces by \kallisto, it was run with the \texttt{--pseudobam} flag.

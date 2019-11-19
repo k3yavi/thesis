@@ -26,6 +26,100 @@ In addition to that, we are reaching out to find other biological applications w
 \rapmap can be useful. In the following section, we discuss some of the applications, 
 which we have worked on, or are currently working. 
 
+% \subsection{Future Study}
+% \subsubsection{Selective Alignment (Srivastava et al., in preparation)}
+%
+% Since its introduction in 2008~\citep{lister,nagalakshmi,mortazavi2008mapping}, transcriptome
+% profiling via RNA-seq has become a popular and widely-used technique to profile gene-
+% and transcript-level expression, and to identify and assemble novel transcripts.
+% Perhaps one of the most common uses of RNA-seq is to quantify gene expression,
+% often with the goal of subsequently performing differential expression analysis
+% on the gene abundance profiles. Due to improvements in RNA-seq quality and read
+% lengths, and also to significant improvements in the available quantification
+% methods, it has become increasingly common to perform quantification and
+% differential testing at the transcript level. Recently, there has been
+% considerable focus on developing very fast computational
+% methods~\citep{sailfish,kallisto,salmon,fleximer} for transcript abundance
+% estimation which obtains their speed, in part, by forgoing the traditional
+% prerequisite step of aligning the reads to the reference genome or
+% transcriptome. These methods have gained popularity due to their
+% markedly smaller computational requirements and their simplicity of use compared to more
+% traditional quantification ``pipelines'' that require alignment of the
+% sequencing reads to the genome or transcriptome, followed by the subsequent
+% processing of the resulting BAM file to obtain quantification estimates.
+%
+% In various assessments on simulated data
+% ~\citep{kanitz2015comparative,germain2016rnaonthebench,zhang2017evaluation}, these lightweight
+% methods have compared favorably to well-tested but much slower methods for
+% abundance estimation, like RSEM~\citep{li2011rsem} coupled with alignment methods such
+% as Bowtie2~\citep{bowtie2}. However, assessments based primarily (or entirely)
+% upon simulated data often fail to capture important aspects of real experiments,
+% and similar performance among methods on such simulated datasets does not
+% necessarily generalize to experimental data. Popular methods for transcript
+% quantification~\citep{rnaskim,fleximer,salmon,kallisto,sailfish,li2011rsem, heraem}
+% differ in many aspects, ranging from how they handle read mapping
+% and alignment, to the optimization algorithms they employ, to subtle differences
+% in their generative models or which biases they model and correct for. These
+% differences are often obscured when analyzing simulated data, since aspects of
+% experimental data that can lead to substantial divergence in quantification
+% estimates are not properly recapitulated in simulation.
+%
+% We focus on the effect of read
+% mapping on the resulting transcript quantification estimates. To compare the
+% effect of different alignment and mapping methods in RNA-seq transcript
+% quantification and related downstream analysis we have picked tools from three
+% different categories of mapping strategies: unspliced alignment of RNA-seq reads
+% directly to the transcriptome, spliced alignment of RNA-seq reads to the
+% annotated genome (with subsequent projection to the transcriptome), and
+% (unspliced) lightweight mapping (\qm) of the RNA-seq reads directly to the
+% transcriptome. While numerous different lightweight mapping approaches
+% exist~\citep{salmon,sailfish,rnaskim,kallisto,rapmap,fleximer}, and the degree to
+% which they diverge from alignment-based methods can differ, a key feature
+% shared by such approaches is that they do not validate predicted fragment mappings
+% via an alignment score, which precludes them from discerning loci where the best mappings
+% would not admit a reasonable-scoring alignment (i.e., spurious mappings). Furthermore,
+% the focus on speed means that such methods tend not to explore sub-optimal mapping loci,
+% despite the fact that such loci might admit the best alignment scores and therefore be
+% the most likely origin for a fragment. We show that differences in how reads are aligned
+% or mapped can lead to considerable differences in the predicted abundances. Specifically, we
+% find that lightweight mapping approaches, which are generally highly
+% concordant with traditional alignment approaches in simulated data, can lead to
+% quite different abundance estimates from alignment-based methods in experimental
+% data. These differences happen across a large number
+% of samples, but the magnitude of the differences can vary substantially from sample to sample. We
+% also find that these differences appear even when exactly the same optimization procedure
+% is used to infer transcript abundances, and are instead a result of the different
+% mapping and alignment approaches returning distinct, and sometimes even
+% disjoint, mapping loci for certain reads.
+%
+% It is somewhat difficult to categorically specify which approaches produce more accurate
+% estimates in experimental data, due to the absence of ground truth. However,
+% we argue that the divergence of lightweight mapping approaches from traditional
+% alignment is usually the result of a failure of the greedy heuristics adopted by
+% lightweight approaches, which are explicitly adopted to maximize the speed of
+% such methods. This further explores and provides evidence for a hypothesis, raised
+% in~\citet{selaln} and ~\citet{heraem}, that lightweight mapping approaches may suffer from
+% spurious mappings leading to a decrease in the resulting quantification
+% accuracy. We also demonstrate that, even among alignment-based approaches,
+% non-trivial differences arise between quantifications based upon mapping to the
+% transcriptome (using Bowtie2~\citep{bowtie2}) and quantifications based upon
+% mapping to the genome and subsequently projecting these alignments into
+% transcriptomic coordinates (using STAR~\citep{star}).
+%
+% Finally, we introduce an improved mapping algorithm, selective alignment (\hsa),
+% that is designed to remain fast, while simultaneously eliminating many of the
+% mapping errors made by lightweight approaches. Our proposed method increases
+% both the sensitivity and specificity of fast read mapping. It relies upon
+% alignment scoring to help differentiate between mapping loci that would
+% otherwise be indistinguishable due to, for example, similar exact matches along with
+% the reference. Our approach also determines when even the best mapping for a
+% read exhibits insufficient evidence that the read truly originated from the
+% locus in question, allowing it to avoid spurious mappings. We benchmark this
+% approach on both simulated data and a broad collection of experimental
+% RNA-seq samples, and demonstrate that it leads to improved
+% concordance with the abundance estimates obtained via quantification following
+% traditional alignment to the transcriptome.
+
 \subsection{Supplementary Study}
 \subsubsection{RapClust~\citep{srivastava2016accurate}}
 
@@ -51,100 +145,6 @@ RapClust also confers a large benefit in terms of space usage, as it produces on
 intermediate files - usually on the order of a few megabytes - even when processing hundreds 
 of millions of reads.
 
-\subsection{Future Study}
-\subsubsection{Selective Alignment (Srivastava et al., in preparation)}
-
-Since its introduction in 2008~\citep{lister,nagalakshmi,mortazavi2008mapping}, transcriptome
-profiling via RNA-seq has become a popular and widely-used technique to profile gene-
-and transcript-level expression, and to identify and assemble novel transcripts.
-Perhaps one of the most common uses of RNA-seq is to quantify gene expression,
-often with the goal of subsequently performing differential expression analysis
-on the gene abundance profiles. Due to improvements in RNA-seq quality and read
-lengths, and also to significant improvements in the available quantification
-methods, it has become increasingly common to perform quantification and
-differential testing at the transcript level. Recently, there has been
-considerable focus on developing very fast computational
-methods~\citep{sailfish,kallisto,salmon,fleximer} for transcript abundance
-estimation which obtains their speed, in part, by forgoing the traditional
-prerequisite step of aligning the reads to the reference genome or
-transcriptome. These methods have gained popularity due to their
-markedly smaller computational requirements and their simplicity of use compared to more
-traditional quantification ``pipelines'' that require alignment of the
-sequencing reads to the genome or transcriptome, followed by the subsequent
-processing of the resulting BAM file to obtain quantification estimates.
-
-In various assessments on simulated data 
-~\citep{kanitz2015comparative,germain2016rnaonthebench,zhang2017evaluation}, these lightweight 
-methods have compared favorably to well-tested but much slower methods for
-abundance estimation, like RSEM~\citep{li2011rsem} coupled with alignment methods such
-as Bowtie2~\citep{bowtie2}. However, assessments based primarily (or entirely)
-upon simulated data often fail to capture important aspects of real experiments,
-and similar performance among methods on such simulated datasets does not
-necessarily generalize to experimental data. Popular methods for transcript
-quantification~\citep{rnaskim,fleximer,salmon,kallisto,sailfish,li2011rsem, heraem} 
-differ in many aspects, ranging from how they handle read mapping
-and alignment, to the optimization algorithms they employ, to subtle differences
-in their generative models or which biases they model and correct for. These
-differences are often obscured when analyzing simulated data, since aspects of
-experimental data that can lead to substantial divergence in quantification
-estimates are not properly recapitulated in simulation.
-
-We focus on the effect of read
-mapping on the resulting transcript quantification estimates. To compare the
-effect of different alignment and mapping methods in RNA-seq transcript
-quantification and related downstream analysis we have picked tools from three
-different categories of mapping strategies: unspliced alignment of RNA-seq reads
-directly to the transcriptome, spliced alignment of RNA-seq reads to the
-annotated genome (with subsequent projection to the transcriptome), and
-(unspliced) lightweight mapping (\qm) of the RNA-seq reads directly to the
-transcriptome. While numerous different lightweight mapping approaches
-exist~\citep{salmon,sailfish,rnaskim,kallisto,rapmap,fleximer}, and the degree to
-which they diverge from alignment-based methods can differ, a key feature
-shared by such approaches is that they do not validate predicted fragment mappings
-via an alignment score, which precludes them from discerning loci where the best mappings 
-would not admit a reasonable-scoring alignment (i.e., spurious mappings). Furthermore, 
-the focus on speed means that such methods tend not to explore sub-optimal mapping loci, 
-despite the fact that such loci might admit the best alignment scores and therefore be 
-the most likely origin for a fragment. We show that differences in how reads are aligned 
-or mapped can lead to considerable differences in the predicted abundances. Specifically, we
-find that lightweight mapping approaches, which are generally highly
-concordant with traditional alignment approaches in simulated data, can lead to
-quite different abundance estimates from alignment-based methods in experimental
-data. These differences happen across a large number
-of samples, but the magnitude of the differences can vary substantially from sample to sample. We
-also find that these differences appear even when exactly the same optimization procedure
-is used to infer transcript abundances, and are instead a result of the different
-mapping and alignment approaches returning distinct, and sometimes even
-disjoint, mapping loci for certain reads.
-
-It is somewhat difficult to categorically specify which approaches produce more accurate 
-estimates in experimental data, due to the absence of ground truth. However,
-we argue that the divergence of lightweight mapping approaches from traditional
-alignment is usually the result of a failure of the greedy heuristics adopted by
-lightweight approaches, which are explicitly adopted to maximize the speed of
-such methods. This further explores and provides evidence for a hypothesis, raised
-in~\citet{selaln} and ~\citet{heraem}, that lightweight mapping approaches may suffer from
-spurious mappings leading to a decrease in the resulting quantification
-accuracy. We also demonstrate that, even among alignment-based approaches,
-non-trivial differences arise between quantifications based upon mapping to the
-transcriptome (using Bowtie2~\citep{bowtie2}) and quantifications based upon
-mapping to the genome and subsequently projecting these alignments into
-transcriptomic coordinates (using STAR~\citep{star}).
-
-Finally, we introduce an improved mapping algorithm, selective alignment (\hsa),
-that is designed to remain fast, while simultaneously eliminating many of the
-mapping errors made by lightweight approaches. Our proposed method increases
-both the sensitivity and specificity of fast read mapping. It relies upon
-alignment scoring to help differentiate between mapping loci that would
-otherwise be indistinguishable due to, for example, similar exact matches along with
-the reference. Our approach also determines when even the best mapping for a
-read exhibits insufficient evidence that the read truly originated from the
-locus in question, allowing it to avoid spurious mappings. We benchmark this
-approach on both simulated data and a broad collection of experimental
-RNA-seq samples, and demonstrate that it leads to improved
-concordance with the abundance estimates obtained via quantification following
-traditional alignment to the transcriptome.
-
 \section{Single cell RNA-seq}
 In ~\cref{alevin}, we present a new end-to-end pipeline for performing gene-level 
 quantification from \dscrnaseq. We show that, compared to other methods, \alevin achieves
@@ -156,6 +156,74 @@ processing and re-processing of \dscrnaseq data. In addition to that, we are rea
 find other single cell platforms where \alevin can be useful. 
 In the following section, we discuss some of the applications, which we have worked on, 
 or are currently working.
+
+% \subsection{Future Study}
+% \subsubsection{Alevin 2.0}
+% RNA-seq quantification has been shown as an important tool to explore the genome-wide
+% quantification of the gene expressions for both bulk and single cell RNA-seq experiments.
+% Specially dscRNA-seq, recently with the advancement in droplet-based sequencing technologies
+% ~\citet{dropseq, indrop, tenx} is generating data with high quantitative accuracy,
+% sensitivity, and throughput. In ~\Cref{alevin}, we have proposed a
+% principled approach for UMI deduplication of dscRNA-seq data which performs a maximum
+% parsimony-based resolution of the PUGs (Parsimonious UMI Graph) and explore its advantage over
+% traditional methods.
+%
+% While RNA-seq abundance estimation experiments capture only a static snapshot at a point in time,
+% a recent study ~\citep{la2018rna} shows for time-resolved phenomena such as embryogenesis, a time
+% derivative of the gene expression state -- RNA velocity -- can be estimated. ~\cite{la2018rna}
+% exploits the conclusions made on bulk experiments ~\citep{zeisel2011coupled} that the balance between
+% nascent (unspliced) and mature (spliced) mRNAs are predictive of cellular state progression and it
+% can be modeled to extrapolate the rate and direction of change in dynamic biological processes.
+% Specifically, they use the relative abundance of unspliced and spliced mRNA to model the rates of
+% gene splicing and degradation in a single cell experiment. We plan to extend \alevin's UMI-deduplication
+% model to include the reads aligning to unspliced regions of the genome (which we call unspliced reads) which,
+% we believe, will further improve the quantification of dscRNA-seq data and the accuracy of tools consuming
+% the abundance estimates of the genes downstream and will enable using alevin for RNA velocity analysis.
+%
+% The major challenges associated with incorporating unspliced reads into \alevin are two-fold.
+% First, as \alevin is internally driven by \salmon's framework of \rapmap based transcriptome
+% alignment of RNA-seq reads; which restricts the inclusion of unspliced reads into the reference
+% as the transcriptome contains sequences, only, from the spliced region of a genome.
+% Second, it is a challenge defining a principled approach to model the deduplication of the UMIs associated
+% with unspliced reads, as the reads can also come from the spliced-unspliced region's boundary.
+% One \naive approach is to separately include the unspliced regions of a genome into the reference
+% transcriptome. However, in expectation, the length of the unspliced region of a genome is much
+% longer than that of a spliced region, which makes the size of a \salmon index big,
+% consuming more memory and second, the differences in the length of the two regions can bias
+% the parsimony resolution algorithm of \alevin towards the unspliced region, making this
+% \naive approach unsuitable for practical use.
+%
+% Although, salmon has pufferfish based sparse indexing scheme which can be used to reduce the size of
+% the index,  Work on using the much more space-efficient pufferfish index to perform mapping is
+% currently being carried out, but is not yet completed. In my proposal, I will focus on the second challenge
+% of modeling the deduplication of UMIs from the unspliced region. I plan to use STAR, a spliced genome aligner,
+% which has been used by many dscRNA-seq quantification pipelines as a default alignment method.
+% I plan to post-process the alignments, as reported by STAR, and consume it downstream in
+% our proposed model of UMI deduplication. I discuss the proposed model in the following section.
+%
+% \textbf{Model:} RNA-seq reads when aligned to the reference genome, can broadly be categorized to
+% align to either of 4 regions i.e. fully inside one exonic region (we call exonic unspliced read, EU),
+% fully inside one unspliced region (intronic unspliced reads, IU),  from the boundary of two
+% exonic region (exon-exon boundary or Exon Spliced reads, ES) and lastly from the boundary of
+% spliced-unspliced region (exon-intron boundary or Intron unspliced reads, IS). For our
+% model IS, IU is considered the same and seen as coming from an intron (I).
+%
+% We first categorize each mapped reads into one of the three categories, namely, ES, EU and I.
+% Later, using the same notion as discussed in ~\Cref{alevin}, we further extend each node in the PUG
+% to have an annotation (among ES, EU, I) along with the previous definition of each node in the graph
+% being represented by a tuple of the UMI sequences, the UMI counts and the transcript
+% equivalence classes. One of the problems with the previously discussed \naive approach of including
+% unspliced region into the reference transcriptome was that each node, regardless of its annotation,
+% can be collapsed into another. In our new model, we restrict the PUG creation algorithm by constraining
+% the criteria for adding an edge (both bidirectional and unidirectional) i.e. we allow edges only between
+% annotation-compatible nodes. Compatibility among the three assignable categories can be defined as:
+% each category is compatible with itself and exon unspliced (EU) reads. Specifically, we disallow
+% edges between exon-spliced (ES) and Intron (I) aligned reads; restricting any one monochromatic
+% arborescence to cover two such nodes with these categories.
+%
+% We believe that the proposed model has an added advantage of including, nontrivial number of reads
+% aligning to the intronic region and utilizes information already present in the previously generated
+% dataset to improve the dscRNA-seq quantification, which otherwise would have been discarded.
 
 \subsection{Supplementary Study}
 \subsubsection{Swish ~\citep{zhu2019nonparametric}}
@@ -203,71 +271,3 @@ gene-by-cell count matrices from droplet-bases scRNA-seq data, demonstrate the e
 realistic levels of gene-level sequence ambiguity can have on accurate quantification, 
 and show a typical use-case of minnow in assessing the output generated by different 
 quantification pipelines on the simulated experiment.
-
-\subsection{Future Study}
-\subsubsection{Alevin 2.0}
-RNA-seq quantification has been shown as an important tool to explore the genome-wide
-quantification of the gene expressions for both bulk and single cell RNA-seq experiments. 
-Specially dscRNA-seq, recently with the advancement in droplet-based sequencing technologies 
-~\citet{dropseq, indrop, tenx} is generating data with high quantitative accuracy, 
-sensitivity, and throughput. In ~\Cref{alevin}, we have proposed a
-principled approach for UMI deduplication of dscRNA-seq data which performs a maximum 
-parsimony-based resolution of the PUGs (Parsimonious UMI Graph) and explore its advantage over 
-traditional methods. 
-
-While RNA-seq abundance estimation experiments capture only a static snapshot at a point in time, 
-a recent study ~\citep{la2018rna} shows for time-resolved phenomena such as embryogenesis, a time 
-derivative of the gene expression state -- RNA velocity -- can be estimated. ~\cite{la2018rna} 
-exploits the conclusions made on bulk experiments ~\citep{zeisel2011coupled} that the balance between 
-nascent (unspliced) and mature (spliced) mRNAs are predictive of cellular state progression and it 
-can be modeled to extrapolate the rate and direction of change in dynamic biological processes. 
-Specifically, they use the relative abundance of unspliced and spliced mRNA to model the rates of 
-gene splicing and degradation in a single cell experiment. We plan to extend \alevin's UMI-deduplication 
-model to include the reads aligning to unspliced regions of the genome (which we call unspliced reads) which, 
-we believe, will further improve the quantification of dscRNA-seq data and the accuracy of tools consuming
-the abundance estimates of the genes downstream and will enable using alevin for RNA velocity analysis.
-
-The major challenges associated with incorporating unspliced reads into \alevin are two-fold.
-First, as \alevin is internally driven by \salmon's framework of \rapmap based transcriptome 
-alignment of RNA-seq reads; which restricts the inclusion of unspliced reads into the reference 
-as the transcriptome contains sequences, only, from the spliced region of a genome. 
-Second, it is a challenge defining a principled approach to model the deduplication of the UMIs associated 
-with unspliced reads, as the reads can also come from the spliced-unspliced region's boundary. 
-One \naive approach is to separately include the unspliced regions of a genome into the reference 
-transcriptome. However, in expectation, the length of the unspliced region of a genome is much 
-longer than that of a spliced region, which makes the size of a \salmon index big, 
-consuming more memory and second, the differences in the length of the two regions can bias 
-the parsimony resolution algorithm of \alevin towards the unspliced region, making this 
-\naive approach unsuitable for practical use.
-
-Although, salmon has pufferfish based sparse indexing scheme which can be used to reduce the size of 
-the index,  Work on using the much more space-efficient pufferfish index to perform mapping is 
-currently being carried out, but is not yet completed. In my proposal, I will focus on the second challenge 
-of modeling the deduplication of UMIs from the unspliced region. I plan to use STAR, a spliced genome aligner, 
-which has been used by many dscRNA-seq quantification pipelines as a default alignment method.
-I plan to post-process the alignments, as reported by STAR, and consume it downstream in
-our proposed model of UMI deduplication. I discuss the proposed model in the following section.
-
-\textbf{Model:} RNA-seq reads when aligned to the reference genome, can broadly be categorized to 
-align to either of 4 regions i.e. fully inside one exonic region (we call exonic unspliced read, EU), 
-fully inside one unspliced region (intronic unspliced reads, IU),  from the boundary of two
-exonic region (exon-exon boundary or Exon Spliced reads, ES) and lastly from the boundary of 
-spliced-unspliced region (exon-intron boundary or Intron unspliced reads, IS). For our
-model IS, IU is considered the same and seen as coming from an intron (I).
-
-We first categorize each mapped reads into one of the three categories, namely, ES, EU and I.
-Later, using the same notion as discussed in ~\Cref{alevin}, we further extend each node in the PUG 
-to have an annotation (among ES, EU, I) along with the previous definition of each node in the graph
-being represented by a tuple of the UMI sequences, the UMI counts and the transcript 
-equivalence classes. One of the problems with the previously discussed \naive approach of including 
-unspliced region into the reference transcriptome was that each node, regardless of its annotation, 
-can be collapsed into another. In our new model, we restrict the PUG creation algorithm by constraining 
-the criteria for adding an edge (both bidirectional and unidirectional) i.e. we allow edges only between
-annotation-compatible nodes. Compatibility among the three assignable categories can be defined as:
-each category is compatible with itself and exon unspliced (EU) reads. Specifically, we disallow
-edges between exon-spliced (ES) and Intron (I) aligned reads; restricting any one monochromatic
-arborescence to cover two such nodes with these categories.
-
-We believe that the proposed model has an added advantage of including, nontrivial number of reads
-aligning to the intronic region and utilizes information already present in the previously generated
-dataset to improve the dscRNA-seq quantification, which otherwise would have been discarded.
