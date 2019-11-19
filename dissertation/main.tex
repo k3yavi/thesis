@@ -23,16 +23,16 @@
 %----------------------------------------------------------------------------------------
 
 \documentclass[
-11pt, % The default document font size, options: 10pt, 11pt, 12pt
-%oneside, % Two side (alternating margins) for binding by default, uncomment to switch to one side
-%chapterinoneline,% Have the chapter title next to the number in one single line
+12pt, % The default document font size, options: 10pt, 11pt, 12pt
+oneside, % Two side (alternating margins) for binding by default, uncomment to switch to one side
+% chapterinoneline,% Have the chapter title next to the number in one single line
 english, % ngerman for German
 singlespacing, % Single line spacing, alternatives: onehalfspacing or doublespacing
-%draft, % Uncomment to enable draft mode (no pictures, no links, overfull hboxes indicated)
+% draft, % Uncomment to enable draft mode (no pictures, no links, overfull hboxes indicated)
 %nolistspacing, % If the document is onehalfspacing or doublespacing, uncomment this to set spacing in lists to single
-%liststotoc, % Uncomment to add the list of figures/tables/etc to the table of contents
+liststotoc, % Uncomment to add the list of figures/tables/etc to the table of contents
 %toctotoc, % Uncomment to add the main table of contents to the table of contents
-%parskip, % Uncomment to add space between paragraphs
+parskip, % Uncomment to add space between paragraphs
 %nohyperref, % Uncomment to not load the hyperref package
 headsepline, % Uncomment to get a line under the header
 ]{main} % The class file specifying the document structure
@@ -49,6 +49,7 @@ headsepline, % Uncomment to get a line under the header
 \usepackage[justification=centering]{caption}
 \usepackage{xspace}
 \usepackage{bm}
+\usepackage{afterpage}
 \usepackage{microtype}
 % \usepackage{xifthen}
 \usepackage{amsmath}
@@ -83,9 +84,11 @@ headsepline, % Uncomment to get a line under the header
     paper=a4paper, % Change to letterpaper for US letter
     inner=2.5cm, % Inner margin
     outer=3.8cm, % Outer margin
-    bindingoffset=2cm, % Binding offset
-    top=1.5cm, % Top margin
-    bottom=1.5cm, % Bottom margin
+    bindingoffset=0cm, % Binding offset
+	left=1in,
+	right=1in,
+    top=1in, % Top margin
+    bottom=1in, % Bottom margin
     %showframe,% show how the type block is set on the page
 }
 
@@ -134,29 +137,35 @@ headsepline, % Uncomment to get a line under the header
 {\huge \bfseries \ttitle\par}\vspace{0.4cm} % Thesis title
 \HRule \\[1.5cm] % Horizontal line
  
-\begin{minipage}[t]{0.4\textwidth}
-\begin{flushleft} \large
-\emph{Author:}\\
-\href{http://k3yavi.github.io/}{\authorname} % Author name - remove the \href bracket to remove the link
-\end{flushleft}
-\end{minipage}
-\begin{minipage}[t]{0.4\textwidth}
-\begin{flushright} \large
-\emph{Committee:} \\
-\href{http://www.robpatro.com/redesign/}{\supname  (Advisor)}\\ % Supervisor name - remove the \href bracket to remove the link 
-\href{http://www3.cs.stonybrook.edu/~bender/}{\examinerOname}\\
-\href{https://www3.cs.stonybrook.edu/~skiena/}{\examinerThname}\\
-\href{https://life.bio.sunysb.edu/ee/restlab/Joshua_Rest.html}{\examinerJrname}
-\end{flushright}
-\end{minipage}\\[2cm]
+% \begin{minipage}[t]{0.4\textwidth}
+% \begin{flushleft} \large
+% \emph{Author:}\\
+% \href{http://k3yavi.github.io/}{\authorname} % Author name - remove the \href bracket to remove the link
+% \end{flushleft}
+% \end{minipage}
+% \begin{minipage}[t]{0.4\textwidth}
+% \begin{flushright} \large
+% \emph{Committee:} \\
+% \href{http://www.robpatro.com/redesign/}{\supname  (Advisor)}\\ % Supervisor name - remove the \href bracket to remove the link
+% \href{http://www3.cs.stonybrook.edu/~bender/}{\examinerOname}\\
+% \href{https://www3.cs.stonybrook.edu/~skiena/}{\examinerThname}\\
+% \href{https://life.bio.sunysb.edu/ee/restlab/Joshua_Rest.html}{\examinerJrname}
+% \end{flushright}
+% \end{minipage}\\[2cm]
  
-\large \textit{A Dissertation presented to \\[0.5cm] 
+\large A Dissertation presented \\[0.5cm] 
+by \\[0.5cm] 
+\href{http://k3yavi.github.io/}{\authorname} \\[0.5cm] 
+to \\[0.5cm] 
 The Graduate School \\[0.5cm] 
-in partial fulfillment of the requirements\\[0.5cm] for the degree of \\[0.5cm] 
-\degreename}\\[0.3cm] % University requirement text
-
-\textit{in the}\\[0.4cm]
-\groupname\\\deptname\\\univname\\[2cm] % Research group name and department name
+in Partial Fulfillment of the \\[0.5cm]
+Requirements \\[0.5cm]
+for the Degree of \\[0.5cm] 
+\textbf{ \degreename}\\[0.5cm] % University requirement text
+in\\[0.5cm]
+% \groupname\\
+\deptname \\[1cm]
+\univname\\[1cm] % Research group name and department name
  
 {\large \today}\\[4cm] % Date
 %\includegraphics{Logo} % University/department logo - uncomment to place it
@@ -169,45 +178,62 @@ in partial fulfillment of the requirements\\[0.5cm] for the degree of \\[0.5cm]
 %    DECLARATION PAGE
 %----------------------------------------------------------------------------------------
 
-% \begin{declaration}
-% \addchaptertocentry{\authorshipname}
-%
+\begin{center}
+	\textbf{\univname}\\[0.5cm]
+	The Graduate School\\[2cm]
+	\textbf{\authorname}\\[2cm]
+	We, the dissertation committee for the above candidate for the \\[0.5cm]
+	Doctor of Philosophy degree, hereby recommend \\[0.5cm]
+	acceptance of this dissertation. \\[1cm]
+	
+	\textbf{\href{http://www.robpatro.com/redesign/}{\supname} -- Dissertation Advisor\\
+	Research Assistant Professor, Department of Computer Science, Stony Brook}\\ [1cm]
+	
+	\textbf{\href{https://www3.cs.stonybrook.edu/~skiena/}{\examinerThname} -- Chairperson of Defense\\
+	Distinguish Teaching professor; SUNY Empire Innovation Professor and Director, AI Institute,
+	Department of Computer Science, Stony Brook}\\ [1cm]
+	
+	\textbf{\href{http://www3.cs.stonybrook.edu/~bender/}{\examinerOname}\\
+	Professor, Department of Computer Science, Stony Brook}\\ [1cm]
+	
+	\textbf{\href{https://life.bio.sunysb.edu/ee/restlab/Joshua_Rest.html}{\examinerJrname}\\
+	Associate Professor, Department of Ecology and Evolution, Stony Brook}\\ [1cm]
+	
+	This dissertation is accepted by the Graduate School\\ [2cm]
+	Eric Wertheimer\\ [0.5cm]
+	Dean of the Graduate School\\ [0.5cm]
+	
+\afterpage{\null\newpage}
 % \noindent I, \authorname, declare that this report titled, \enquote{\ttitle} and the work presented in it are my own. I confirm that:
-%
-% \begin{itemize}
-% \item This work was done wholly or mainly while in candidature for a research degree at this University.
-% \item Where any part of this thesis has previously been submitted for a degree or any other qualification at this University or any other institution, this has been clearly stated.
-% \item Where I have consulted the published work of others, this is always clearly attributed.
-% \item Where I have quoted from the work of others, the source is always given. With the exception of such quotations, this thesis is entirely my own work.
-% \item I have acknowledged all main sources of help.
-% \item Where the thesis is based on work done by myself jointly with others, I have made clear exactly what was done by others and what I have contributed myself.\\
-% \end{itemize}
 %
 % \noindent Signed:\\
 % \rule[0.5em]{25em}{0.5pt} % This prints a line for the signature
 %
 % \noindent Date:\\
 % \rule[0.5em]{25em}{0.5pt} % This prints a line to write the date
-% \end{declaration}
-%
+\end{center}
+
 % \cleardoublepage
-
-%----------------------------------------------------------------------------------------
-%    QUOTATION PAGE
-%----------------------------------------------------------------------------------------
-
-\vspace*{0.2\textheight}
-
-\noindent\enquote{\itshape Nature uses only the longest threads to weave her patterns so that each small piece of her fabric reveals the organization of the entire tapestry.}\bigbreak
-
-\hfill Richard Feynman
 
 %----------------------------------------------------------------------------------------
 %    ABSTRACT PAGE
 %----------------------------------------------------------------------------------------
 
-\begin{abstract}
-\addchaptertocentry{\abstractname} % Add the abstract to the table of contents
+\renewcommand{\abstractname}{Abstract of the Dissertation}
+\begin{center}
+	\section*{\abstractname}
+	\addchaptertocentry{\abstractname} % Add the abstract to the table of contents
+
+		% Abstract of the Dissertation \\ [0.5cm]
+		\textbf{\ttitle} \\ [0.5cm]
+		by  \\ [0.5cm]
+		\textbf{\authorname} \\ [0.5cm]
+		\textbf{Doctor of Philosophy} \\ [0.5cm]
+		in \\ [0.5cm]
+		\textbf{\deptname}  \\ [0.5cm]
+		\univname  \\ [0.5cm]
+		2019  \\ [0.5cm]
+\end{center}
 
 RNA Sequencing (RNA-seq) technologies are evolving rapidly, and with them, the requirement 
 for fast and accurate tools to analyze the generated data. The first step of many RNA-seq
@@ -245,8 +271,59 @@ quantifications in an efficient, dynamic (dataset dependent) way. This optimizes
 speed/accuracy tradeoff, making the estimates almost as accurate as end-to-end alignment-based
 methods, while still using resources similar to \rapmap. Moreover, we propose a principled approach and 
 study the effect of further extending \alevin's UMI deduplication algorithm to include unspliced RNA.
+\newpage
 
-\end{abstract}
+% \end{abstract}
+
+%----------------------------------------------------------------------------------------
+%    QUOTATION PAGE
+%----------------------------------------------------------------------------------------
+
+\vspace*{0.2\textheight}
+
+\noindent\enquote{\itshape Nature uses only the longest threads to weave her patterns so that each small piece of her fabric reveals the organization of the entire tapestry.}\bigbreak
+
+\hfill Richard Feynman
+
+%----------------------------------------------------------------------------------------
+%    LIST OF CONTENTS/FIGURES/TABLES PAGES
+%----------------------------------------------------------------------------------------
+
+\tableofcontents % Prints the main table of contents
+
+\listoffigures % Prints the list of figures
+
+\listoftables % Prints the list of tables
+
+% ----------------------------------------------------------------------------------------
+%     ABBREVIATIONS
+% ----------------------------------------------------------------------------------------
+
+\begin{abbreviations}{ll} % Include a list of abbreviations (a table of two columns)
+
+\textbf{ARD} & \textbf{A}bsolute  \textbf{R}elative \textbf{D}ifference\\
+\textbf{BLAST} & \textbf{B}asic \textbf{L}ocal \textbf{A}lignment \textbf{S}earch \textbf{T}ool\\
+\textbf{BWT} & \textbf{B}urrows-\textbf{W}heeler \textbf{T}ransform\\
+\textbf{DFS} & \textbf{D}epth-\textbf{F}irst \textbf{S}earch\\
+\textbf{DP} & \textbf{D}ynamic-\textbf{P}rogram\\
+\textbf{Indel} & \textbf{In}setion (and) \textbf{D}eletion\\
+\textbf{MARD} & \textbf{M}ean \textbf{A}bsolute  \textbf{R}elative \textbf{D}ifference\\
+\textbf{NGS} & \textbf{N}ext \textbf{G}eneration \textbf{S}equencing\\
+\textbf{SA} & \textbf{S}uffix \textbf{A}rray\\
+\textbf{SGS} & \textbf{S}econd \textbf{G}eneration \textbf{S}equencing\\
+\textbf{SIMD} & \textbf{S}ingle \textbf{I}nstruction \textbf{M}ultiple \textbf{D}ata\\
+\textbf{SMEM} & \textbf{S}uper \textbf{M}aximal \textbf{E}xact \textbf{M}atch\\
+\textbf{T-DBG} & \textbf{T}ranscriptome - \textbf{d}e \textbf{B}ruijn \textbf{G}raph\\
+\textbf{TPEF} & \textbf{T}rue \textbf{P}ositive \textbf{E}rror \textbf{F}raction\\
+\textbf{TPME} & \textbf{T}rue \textbf{P}ositive  \textbf{M}edian \textbf{E}rror\\
+\textbf{VBEM} & \textbf{V}ariational \textbf{B}ayesian - \textbf{E}xpectation \textbf{M}aximization\\
+\textbf{wMARD} & \textbf{w}eighted \textbf{M}ean \textbf{A}bsolute  \textbf{R}elative \textbf{D}ifference\\
+\textbf{dscRNA-seq} & \textbf{d}roplet based \textbf{s}ingle \textbf{c}ell  \textbf{RNA}-seq\\
+\textbf{CB} & \textbf{C}ellular \textbf{B}arcode\\
+\textbf{UMI} & \textbf{U}nique \textbf{M}olecule \textbf{I}dentifier\\
+\textbf{PUG} & \textbf{P}arsimonious \textbf{U}MI \textbf{G}raph\\
+
+\end{abbreviations}
 
 %----------------------------------------------------------------------------------------
 %    ACKNOWLEDGEMENTS
@@ -289,46 +366,6 @@ Cyberinfrastructure, and the Institute for Advanced Computational Science at Sto
 University for access to the high-performance SeaWulf computing system, which was made 
 possible by a National Science Foundation grant (\#1531492).
 \end{acknowledgements}
-
-%----------------------------------------------------------------------------------------
-%    LIST OF CONTENTS/FIGURES/TABLES PAGES
-%----------------------------------------------------------------------------------------
-
-\tableofcontents % Prints the main table of contents
-
-\listoffigures % Prints the list of figures
-
-\listoftables % Prints the list of tables
-
-% ----------------------------------------------------------------------------------------
-%     ABBREVIATIONS
-% ----------------------------------------------------------------------------------------
-
-\begin{abbreviations}{ll} % Include a list of abbreviations (a table of two columns)
-
-\textbf{ARD} & \textbf{A}bsolute  \textbf{R}elative \textbf{D}ifference\\
-\textbf{BLAST} & \textbf{B}asic \textbf{L}ocal \textbf{A}lignment \textbf{S}earch \textbf{T}ool\\
-\textbf{BWT} & \textbf{B}urrows-\textbf{W}heeler \textbf{T}ransform\\
-\textbf{DFS} & \textbf{D}epth-\textbf{F}irst \textbf{S}earch\\
-\textbf{DP} & \textbf{D}ynamic-\textbf{P}rogram\\
-\textbf{Indel} & \textbf{In}setion (and) \textbf{D}eletion\\
-\textbf{MARD} & \textbf{M}ean \textbf{A}bsolute  \textbf{R}elative \textbf{D}ifference\\
-\textbf{NGS} & \textbf{N}ext \textbf{G}eneration \textbf{S}equencing\\
-\textbf{SA} & \textbf{S}uffix \textbf{A}rray\\
-\textbf{SGS} & \textbf{S}econd \textbf{G}eneration \textbf{S}equencing\\
-\textbf{SIMD} & \textbf{S}ingle \textbf{I}nstruction \textbf{M}ultiple \textbf{D}ata\\
-\textbf{SMEM} & \textbf{S}uper \textbf{M}aximal \textbf{E}xact \textbf{M}atch\\
-\textbf{T-DBG} & \textbf{T}ranscriptome - \textbf{d}e \textbf{B}ruijn \textbf{G}raph\\
-\textbf{TPEF} & \textbf{T}rue \textbf{P}ositive \textbf{E}rror \textbf{F}raction\\
-\textbf{TPME} & \textbf{T}rue \textbf{P}ositive  \textbf{M}edian \textbf{E}rror\\
-\textbf{VBEM} & \textbf{V}ariational \textbf{B}ayesian - \textbf{E}xpectation \textbf{M}aximization\\
-\textbf{wMARD} & \textbf{w}eighted \textbf{M}ean \textbf{A}bsolute  \textbf{R}elative \textbf{D}ifference\\
-\textbf{dscRNA-seq} & \textbf{d}roplet based \textbf{s}ingle \textbf{c}ell  \textbf{RNA}-seq\\
-\textbf{CB} & \textbf{C}ellular \textbf{B}arcode\\
-\textbf{UMI} & \textbf{U}nique \textbf{M}olecule \textbf{I}dentifier\\
-\textbf{PUG} & \textbf{P}arsimonious \textbf{U}MI \textbf{G}raph\\
-
-\end{abbreviations}
 
 %----------------------------------------------------------------------------------------
 %    PHYSICAL CONSTANTS/OTHER DEFINITIONS
