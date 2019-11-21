@@ -10,27 +10,44 @@
 
 RNA-seq quantification has been shown as an important tool to explore the genome-wide
 quantification of the gene expressions for both bulk and single cell RNA-seq experiments.
-Specially dscRNA-seq, recently with the advancement in droplet-based sequencing technologies
-~\citet{dropseq, indrop, tenx} is generating data with high quantitative accuracy,
-sensitivity, and throughput. In ~\Cref{alevin}, we proposed a principled framework for 
-generating accurate gene-expression estimate. We showed how discarding gene-multimapping 
-reads by all the other dscRNA-seq quantification pipelines leads to biased expression estimates. 
-
-In previous generation of alevin, after the UMI resolution phase, the ambiguous reads with more 
-than 1 gene label are assigned to genes based on an expectation-maximization method. The 
-framework works well in most of the cases, however, in situations where there is no unique 
+DscRNA-seq experiments have been especially useful as with the advancement in droplet-based 
+sequencing technologies~\citet{dropseq, indrop, tenx} is helping to generate data with high quantitative 
+accuracy, sensitivity, and throughput. Previously, in ~\Cref{alevin}, we proposed a principled 
+framework for generating cell wise gene-expression estimate from the read sequences. We showed how 
+discarding gene-multimapping reads by all the other dscRNA-seq quantification pipelines leads to 
+biased expression estimates. In the previous generation of alevin, after the UMI resolution phase, 
+the ambiguous reads with more than 1 gene label are assigned to genes based on an expectation-maximization 
+method. The framework works well in most of the cases, however, in situations where there is no unique 
 read evidence to confidently disambiguate the read label among the genes, we called them 
 tier-3 estimates, the likelihood estimator uniformly divides the reads across the genes in the 
-label. In this study we propose the idea of information sharing across closely related cells 
-using bayesian prior for specifically improving the tier-3 estimates. Intuitively, since we expect 
-relatively similar gene expression among the cells with similar types, we propose that sharing 
-information (eg. which genes are expressed) across neighboring cells improves the quantification 
-estimates of an individual cells. We show that the novel idea of information sharing using bayesian 
-prior to improve the quantification can be successfully applied to a dscRNA-seq data for improving the 
+equivalence class label. In this study we propose the idea of information sharing across closely 
+related cells using bayesian prior for specifically improving the tier-3 estimates. Intuitively speaking, 
+since among the cells with similar cell-types we expect relatively similar gene expression, we propose that 
+sharing information (in the form of expression) across neighboring cells improves the quantification 
+estimates of individual cells. We show that the our idea of information sharing using bayesian 
+prior to improve the quantification can be successfully applied to a dscRNA-seq data and improves the 
 quantification estimates.
 
 \section{Material and Methods}
 \label{sec:alv2_methods}
+
+\subsection{Variational Bayesian dscRNA-seq quantification}
+
+
+\subsection{Cross Sample Cellular Barcode Anchoring}
+Tier 3 estimates are specifically the estimates which have reads assigned to gene ambiguous 
+labels and they don't have any uniquely assignable read evidence, even in their equivalence 
+class network. To disambiguate the labels for the assignable gene we propose to use the 
+information either from the cells with similar type within the sample or across different 
+type of data itself such as ATAC-seq data from similar tissue. To find similar cells for sharing 
+the confidence in their gene expression estimates we use Seurat ~\citep{seurat3} based anchoring 
+scheme. In Seurat3 stuart et. al. proposed an anchoring scheme in which they defined a framework 
+to connect two experiments based on the similarity in various cell's gene expression pattern. 
+They first find nearest neighbor using l2 distance of both inter and intra datatsets to generate 
+four distance matrices. Later, they look for the cells which are neighbors to each other in both 
+the directions to define anchors connecting two cells with similar looking expression patterns 
+across different single cell datasets. We use the same anchoring algotihm to connect two similar 
+cells and define the priors in their quantification estimation.
 
 \section{Results}
 \subsection{Comparing quantification methods on simulated data}
@@ -115,21 +132,6 @@ more accurate, the confidence in tier3 assigned estimates is low and often the c
 accuracy difference with the truth. We expect the similar pattern of tier3 genes in the real 
 data as well. 
 %\avi{add a figure comparing tiers of real data w/ simulated}
-
-\subsection{Cross Sample Cellular Barcode Anchoring}
-Tier 3 estimates are specifically the estimates which have reads assigned to gene ambiguous 
-labels and they don't have any uniquely assignable read evidence, even in their equivalence 
-class network. To disambiguate the labels for the assignable gene we propose to use the 
-information either from the cells with similar type within the sample or across different 
-type of data itself such as ATAC-seq data from similar tissue. To find similar cells for sharing 
-the confidence in their gene expression estimates we use Seurat ~\citep{seurat3} based anchoring 
-scheme. In Seurat3 stuart et. al. proposed an anchoring scheme in which they defined a framework 
-to connect two experiments based on the similarity in various cell's gene expression pattern. 
-They first find nearest neighbor using l2 distance of both inter and intra datatsets to generate 
-four distance matrices. Later, they look for the cells which are neighbors to each other in both 
-the directions to define anchors connecting two cells with similar looking expression patterns 
-across different single cell datasets. We use the same anchoring algotihm to connect two similar 
-cells and define the priors in their quantification estimation.
 
 \subsection{Variational Bayesian Improves dscRNA-seq quantification}
 The previously proposed framework of alevin esimates the maximum likelihood estimates (MLE) to 
