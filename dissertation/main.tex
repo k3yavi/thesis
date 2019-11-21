@@ -237,13 +237,13 @@ in\\[0.5cm]
 
 RNA Sequencing (RNA-seq) technologies are evolving rapidly, and with them, the requirement 
 for fast and accurate tools to analyze the generated data. The first step of many RNA-seq
-analyses require us to solve the problem of \ra. When reads are aligned to a collection of 
+analyses requires us to solve the problem of \ra. When reads are aligned to a collection of 
 reference sequences that share a substantial amount of sub-sequence (near or exact repeats), 
-a single read can have many potential alignments, and considering all such alignment can be 
-crucial for downstream analysis like quantification. This proposal discusses the evolution of 
+a single read can have many potential alignments, and considering all such alignments can be 
+crucial for downstream analyses, such as quantification. This proposal discusses the evolution of 
 the tools developed to handle the problem of \ra for next-generation sequencing, their impact 
-on RNA-seq analysis, introduce a novel concept, \qm, and an efficient algorithm implementing 
-this approach called \rapmap which maps RNA-seq \reads (sequences) to the reference sequence(s) 
+on RNA-seq analysis, introduces a novel concept, \qm, and an efficient algorithm implementing 
+this approach called \rapmap, which maps RNA-seq \reads (sequences) to the reference sequence(s) 
 (transcriptome). By attempting only to report the potential loci of origin of a sequencing read, 
 and not the base-to-base alignment by which it derives from the reference, \rapmap is capable of 
 \textit{mapping} sequencing reads to a target transcriptome substantially faster than existing 
@@ -251,8 +251,9 @@ alignment tools. The algorithm we employ to implement \qm uses several efficient
 and takes advantage of the special structure of shared sequence prevalent in transcriptomes to 
 rapidly provide highly-accurate mapping information.
 
-While bulk RNA-sequencing is an established method to perform genome-wide quantification of gene 
-expressions, however, quantification tools for bulk RNA-seq cannot be directly used for 
+Over the last decade, single-cell sequencing technologies have gained popularity and,
+while bulk RNA-sequencing is an established method to perform genome-wide quantification of gene 
+expressions, quantification tools for bulk RNA-seq cannot be directly used for 
 droplet-based single-cell RNA-sequencing (dscRNA-seq) data. We introduce alevin, a fast 
 end-to-end pipeline to process droplet-based single-cell RNA sequencing data, performing 
 cell barcode detection, read mapping, unique molecular identifier (UMI) deduplication, 
@@ -337,29 +338,29 @@ grow both personally and professionally. A big fraction of that is due to my adv
 Rob Patro, whom I'd like to thank for his patience, guidance, and encouragement for letting 
 me explore the field of computational biology.
 Working with him has been very exciting as he taught me how to do science. His vision 
-and tenaciousness to work and improve the RNA-seq quantification has helped me learn, 
-how looking at a problem from many different angles generate exciting new ideas. I also 
-feel, his love for statically-typed programmed programming languages has helped me realize 
+and tenaciousness to work and improve RNA-seq quantification has helped me learn
+how looking at a problem from many different angles can generate exciting new ideas. I also 
+feel that his love for statically-typed programmed programming languages has helped me realize 
 the importance of designing efficient tools which I hope to keep for the rest of my career.
 
 I'd like to thank other members of my committee, Steve Skiena, Michael Bender and Joshua Rest whose 
-important contributions through various lectures, talks, and feedback on this dissertation has 
-been pivotal for my cademic development while at Stony Brook university. I'm honored to 
+important contributions through various lectures, talks, and feedback on this dissertation have 
+been pivotal for my academic development while at Stony Brook University. I'm honored to 
 have them as my committee members.
 
 I'm very grateful to my colleagues and it was an exciting experience to learn and grow
 alongside them over the years. In particular, Laraib Malik, Hirak sarkar, Mohsen Zakeri, and 
-Fatemeh Almodaresi made Combine-Lab an interesting place to work as they helped me by 
-providing insightful discussions. I can't imagine working through all the paper deadlines,
-had been a more enjoyable and pleasant experience without them. I'd also like to thank Mike Love, 
+Fatemeh Almodaresi made Combine-Lab an interesting place to work as they helped me 
+through insightful discussions. I can't imagine working through all the paper deadlines being
+an enjoyable and pleasant experience without them. I'd also like to thank Mike Love, 
 Charlotte Soneson, Geet Duggal, Richard Smith-Unna, Owen Dando, Darya Filipova, Patrick Marks 
 and Paul Ryvkin for their insightful discussions regarding various aspects of the work.
 
-I couldn't thank enough to my family for their support throughout my journey of learning. 
-Especially my father, Y K Srivastava, who guided me from my childhood to learn and motivate me 
-to think out-of-box. I'd like to thank my mother Ritima Srivastava, brother Prakhar Srivastava,
-late grandparents, Govind Prasad Srivastava, Savitri Srivastava, and all my cousins brother and
-sister for providing the comfortable and loving environment they provided for me growing up. 
+I can't thank my family enough for their support throughout my journey of learning. 
+Especially my father, Y K Srivastava, who guided me from my childhood to learn actively and motivated me 
+to think out-of-the-box. I'd like to thank my mother Ritima Srivastava, brother Prakhar Srivastava,
+late grandparents, Govind Prasad Srivastava, Savitri Srivastava, and all my cousins
+ for providing a comfortable and loving environment for me while growing up. 
 
 At last, I would also like to thank Stony Brook Research Computing and 
 Cyberinfrastructure, and the Institute for Advanced Computational Science at Stony Brook 
