@@ -173,15 +173,43 @@ over expression i.e. low deduplication, provided their FP numbers are the lowest
 	\label{tab:f1}
 \end{table}
 
-\subsection{Simulations and Real data shares similar patterns of tier3 genes}
-In our previously proposed framework we categorize the confidence in the generated gene counts 
-estimates using tiers. Even though in previous section we show the alevin generated quants are 
-more accurate, the confidence in tier3 assigned estimates is low and often the cause of the 
-accuracy difference with the truth. We expect the similar pattern of tier3 genes in the real 
-data as well. 
-%\avi{add a figure comparing tiers of real data w/ simulated}
+  \begin{figure}[!htb]
+      \centering
+    \includegraphics[width=\linewidth]{alevin2/fdr.pdf}
+    \caption{ Comparison of False Discovery Rate (FDR) i.e. including both FP and FN with the
+	the number of mispredicted UMIs. }
+    \label{fig:alv2_fdr}
+  \end{figure}
+
+  \begin{figure}[!htb]
+      \centering
+    \includegraphics[width=\linewidth]{alevin2/t3_assign.pdf}
+    \caption{ The distribution of the number of genes with the fraction of cells they have tier3
+	assignment.}
+    \label{fig:alv2_t3}
+  \end{figure}
+
+In ~\Cref{fig:alv2_fdr} we show the fraction of false discoveries which are covered by the
+extent in a method's mis-estimation. We include both FP and FN as false discoveries and 
+find that more than 90\% of alevin's false predictions are below 1 UMI count. 
 
 \subsection{Variational Bayesian Improves dscRNA-seq quantification}
+In ~\Cref{alevin}, we categorize the confidence in the generated gene counts estimates using tiers. 
+Even though ~\Cref{subsec:alv2_sims}, we show the alevin generated quants are more accurate
+than competing tools, the confidence in tier3 assigned estimates is low and often the source of 
+the mis-estimation. We found that in the simulated data, more than 66\% of the false discoveries made 
+by alevin are in the tier3 estimates and due to the inherant problem of sparsity in dscRNA-seq data,
+we expect the similar pattern of tier3 genes in the real data as well. 
+
+In \Cref{fig:alv2_t3} we show the distribution of the genes with tier3 prediction in at least one cell,
+versus the percentage of cells they have tier3 prediction overall. This aligns with the fundamental 
+property of a dscRNA-seq experiments i.e. molecules are randomly captured across cells and although
+some cells might randomly sample the read sequence from the ambiguous region (or no sample at all) but, 
+in expectation, similar cells in a group can potentially have different confidence in their gene
+estimation. Hence, to improve the expression estimates of the tier3 genes, we proposed the idea of 
+information sharing across cells (details in ~\Cref{sec:alv2_methods}).
+
+\subsubsection{Migration Experiment onf Real Data}
 
 
 \section{Conclusion}
