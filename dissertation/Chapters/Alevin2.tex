@@ -32,22 +32,70 @@ quantification estimates.
 \label{sec:alv2_methods}
 
 \subsection{Variational Bayesian dscRNA-seq quantification}
+Similar to salmon's ~\citep{salmon} collapsed variational bayesian optimization 
+objective our aim is to quantify the expression, given a set of known genes $\mathcal{G}$ and a set
+of gene-level equivalence classes with their UMI counts, generated post UMI deduplication using alevin's 
+framework, as $\mathcal{E}$. The previous generation of alevin takes a maximum-likelihood based approach to 
+optimize the gene-level ambiguous read assignment objective, however, it lacks the ability to utilize the 
+confidence from neighboring cells. As the dscRNA-seq data has high sparsity we expect that sharing
+the confidence in the expression estimate across cells can be particularly effective in improving the
+cell-level expression because in expectation due to the random process of capturing the RNA molecule,
+sampling noise wouldn't be uniformly bad across all cells.
 
+Salmon ~\citep{salmon} a bulk RNA-seq quantification tools uses bayesian priors to improve the 
+quantification estimates by its online learning phase. We use the relaxed version of the algorithm 
+to improve the estimates of alevin. Specifically, if we define gene-UMI count 
+assignment matrix as $\mathcal{Z}$, where based on $\mathcal{E}$, $z_{ij}=1$ if UMI $j$ is derived from 
+gene $i$ and the probability of generating a molecule from a particular gene as $\rho$ (analogous to 
+nucleotide fraction in salmon model); we can write the probability of observing a set of deduplicated 
+UMIs $\mathcal{U}$ as follows:
 
-\subsection{Cross Sample Cellular Barcode Anchoring}
-Tier 3 estimates are specifically the estimates which have reads assigned to gene ambiguous 
-labels and they don't have any uniquely assignable read evidence, even in their equivalence 
-class network. To disambiguate the labels for the assignable gene we propose to use the 
-information either from the cells with similar type within the sample or across different 
-type of data itself such as ATAC-seq data from similar tissue. To find similar cells for sharing 
-the confidence in their gene expression estimates we use Seurat ~\citep{seurat3} based anchoring 
-scheme. In Seurat3 stuart et. al. proposed an anchoring scheme in which they defined a framework 
-to connect two experiments based on the similarity in various cell's gene expression pattern. 
-They first find nearest neighbor using l2 distance of both inter and intra datatsets to generate 
+\begin{equation}
+	\Pr\{\mathcal{U} | \mathcal{Z},\mathcal{G}\} = 
+	\prod_{j=1}^{N}\sum_{i=1}^{M}\Pr\{ g_i | \rho \} \cdot \Pr\{ u_j | g_j, z_{i,j} = 1 \}
+\end{equation}
+ 
+ where $|\mathcal{U}| = N$ is the number of total molecules in the experiment (i.e. the number of 
+ deduplicated UMIs ) and $|\mathcal{G}| = M$ is the number of total genes.
+ 
+ In this study we take the Bayesian approach for the gene-expression estimation i.e. instead of 
+ seeking the maximum-likelihood estimates we infer the posterior distribution of $\rho$. 
+ This posterior distrbution can be defined as:
+
+\begin{equation}
+	\Pr \{ \rho | \mathcal{U} \mathcal{G} \} 
+	\propto \sum_{\mathcal{Z}} \Pr\{ \mathcal{U} | \mathcal{G} \mathcal{Z} \}
+	\cdot \Pr\{ \mathcal{Z} | \rho \} \cdot \Pr\{ \rho \}
+\end{equation}
+
+where both $\Pr\{ \mathcal{U} | \mathcal{G} \mathcal{Z} \}$ and $\Pr\{ \mathcal{Z} | \rho \}$ are 
+a data dependant observables and can be estimated as defined in ~\citep{salmon}. The novelty of our method
+comes with setting the right prior term $\Pr\{ \rho \}$, specifically for dscRNA-seq data. We perform
+within sample anchoring using Seurat3 (details in ~\Cref{subsec:anchor}) and use the gene expression
+estimates from the nearest cells (with anchoring score >0.5) to generate cell-specific prior.
+
+\subsection{Cellular Barcode Anchoring}
+\label{subsec:anchor}
+In ~\Cref{alevin} we defined tier 3 estimates as specifically the estimates which have reads assigned 
+to gene ambiguous labels and they don't have any uniquely assignable read evidence in their equivalence 
+class network. To disambiguate the labels for the assignable gene we use the 
+information from the cells with similar type within the sample. To find similar cells for sharing 
+the confidence in their gene expression estimates we use Seurat ~\citep{seurat3} based cellular
+barcode anchoring scheme. In Seurat3, ~\citep{seurat3} proposed an anchoring scheme in which they 
+defined a framework to connect two experiments based on the similarity in their cell's gene expression 
+pattern. They first find nearest neighbor using l2 distance of both inter and intra datatsets to generate 
 four distance matrices. Later, they look for the cells which are neighbors to each other in both 
 the directions to define anchors connecting two cells with similar looking expression patterns 
 across different single cell datasets. We use the same anchoring algotihm to connect two similar 
 cells and define the priors in their quantification estimation.
+
+Anchoring process can sometime generate multi-mapping in both direction, to compensate that we take average 
+of all the neighboring cells which has been chosen as anchor to define the prior. In a typical 4000 single 
+cell experiment we run alevin and repeat the Seurat3 anchoring approach $30$ times, randomly dividing 
+the cells into two equal sets and mapping one set onto the other. We discard the self anchors and use 
+anchors with score $>0.5$ as a potential list of neighboring cells to define the priors. This prior 
+is then used to optimize the quantification estimates of genes with multi-mapping reads in the alevin 
+pipeline.
 
 \section{Results}
 \subsection{Comparing quantification methods on simulated data}
@@ -134,20 +182,7 @@ data as well.
 %\avi{add a figure comparing tiers of real data w/ simulated}
 
 \subsection{Variational Bayesian Improves dscRNA-seq quantification}
-The previously proposed framework of alevin esimates the maximum likelihood estimates (MLE) to 
-disambiguate the gene ambiguous read assignment, however, it lacks the ability to utilize the 
-confidence from neighboring cells. Salmon ~\citep{salmon} a bulk RNA-seq quantification tools uses 
-bayesian priors to improve the quantification estimates by its online learning phase. We use the 
-relaxed version of the algorithm (See \Cref{sec:alv2_methods}) to improve the estimates of alevin. 
-We use the anchoring scheme to connect cells in two datasets and use the estimates from one as a 
-prior to second for providing the confidence in a gene's expression within a cell. Anchoring process 
-can sometime generate multi-mapping in both direction, to compensate that we take average of all 
-the neighboring cells which has been chosen as anchor to define the prior. In a typical 4000 single 
-cell experiment we run alevin and repeat the Seurat3 anchoring approach $30$ times, randomly dividing 
-the cells into two equal sets and mapping one set onto the other. We discard the self anchors and use 
-anchors with score $>0.5$ as a potential list of neighboring cells to define the priors. This prior 
-is then used to optimize the quantification estimates of genes with multi-mapping reads in the alevin 
-pipeline.
+
 
 \section{Conclusion}
 We proposed a bayesian framework which extends previous generation alevin's maximum likelihood based 
