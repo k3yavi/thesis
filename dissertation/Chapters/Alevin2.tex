@@ -175,7 +175,7 @@ over expression i.e. low deduplication, provided their FP numbers are the lowest
 
   \begin{figure}[!htb]
       \centering
-    \includegraphics[width=\linewidth]{alevin2/fdr.pdf}
+    \includegraphics[height=3in]{alevin2/fdr.pdf}
     \caption{ Comparison of False Discovery Rate (FDR) i.e. including both FP and FN with the
 	the number of mispredicted UMIs. }
     \label{fig:alv2_fdr}
@@ -183,7 +183,7 @@ over expression i.e. low deduplication, provided their FP numbers are the lowest
 
   \begin{figure}[!htb]
       \centering
-    \includegraphics[width=\linewidth]{alevin2/t3_assign.pdf}
+    \includegraphics[height=3in]{alevin2/t3_assign.pdf}
     \caption{ The distribution of the number of genes with the fraction of cells they have tier3
 	assignment.}
     \label{fig:alv2_t3}
@@ -219,25 +219,40 @@ classes. In our migration experiment, we knocked off (KO) all unique transcript 
 the expectation that the KO bfh will migrate some of the tier1 and tier2 estimates to tier3, as they have
 may lose the unique information which made them high confidence tiers (tier1 and tier2). 
 
-We take the quantification estimates from pbmc\_4k experiment with 4340 cells and randomly divide it into
+  \begin{figure}[!htb]
+      \centering
+    \includegraphics[height=3in]{alevin2/migration.png}
+    \caption{ Comparison of the cell wise spearman correlation of EM based alevin with VBEM based
+	prior enhanced alevin on real data migration experiment}
+    \label{fig:alv2_real_val}
+  \end{figure}
+
+We took the quantification estimates from pbmc\_4k experiment with 4340 cells and randomly divide it into
 two parts of 2170 cells each, we call 2ka and 2kb experiment. We perform the migration experiment on
 2ka cells and generate alevin EM estimates using KO bfh. Later, we anchors KO 2ka estimates 
 with full 2kb estimates and learn informative priors for KO 2ka estimates to requantify using alevin VBEM
-approach. In ~\Cref{fig:alv2_t3}, we show the cell wise correlaion of KO 2ka experiment using EM and VBEM
+approach. In ~\Cref{fig:alv2_real_val}, we show the cell wise correlaion of KO 2ka experiment using EM and VBEM
 with non KO 2ka experiment. Since the anchoring scheme can't always find high confidence anchors for all 
 cells, we see a bimodal distribution with VBEM approach which signifies the first mode (overlapping 
 with EM mode) are cells with no informative prior while the second mode (with imporved correlation)
 signifies cells with informed prior.
 
+\subsubsection{VBEM Validation on Simulated Data}
+We validate our prior enhanved VBEM approach on simulated data using the minnow generated data (details in
+~\Cref{subsec:alv2_sims}). We first use EM based alevin on the simulated data to generate quantification
+estimates on 4340 cells. We use Seurat's anchoring scheme to self anchor the estimates and generate the
+prior. Using the learnt prior we requantify the simulated dataset with our VBEM based approach to generate 
+the new estimates. In ~\Cref{fig:alv2_sim_val}, we compare the cell wise correlation of both EM and VBEM
+based approaches to the minnow generated ground truth and observe higher correlation with VBEM generated
+gene expression estimates.
+
   \begin{figure}[!htb]
       \centering
-    \includegraphics[width=\linewidth]{alevin2/migration.png}
-    \caption{ We compare the cell wise spearman correlation of EM based alevin with VBEM based
-	prior enhanced alevin.}
-    \label{fig:alv2_t3}
+    \includegraphics[height=3in]{alevin2/sim_corr.pdf}
+    \caption{ Comparison of the cell wise spearman correlation of EM based alevin with VBEM based
+	prior enhanced alevin on simulated experiment}
+    \label{fig:alv2_sim_val}
   \end{figure}
-
-\subsubsection{Experiment on Simulated Data}
 
 \section{Conclusion}
 We proposed a bayesian framework which extends previous generation alevin's maximum likelihood based 
