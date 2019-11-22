@@ -209,8 +209,35 @@ in expectation, similar cells in a group can potentially have different confiden
 estimation. Hence, to improve the expression estimates of the tier3 genes, we proposed the idea of 
 information sharing across cells (details in ~\Cref{sec:alv2_methods}).
 
-\subsubsection{Migration Experiment onf Real Data}
+\subsubsection{Migration Experiment on Real Data}
+We validate the variational bayesian objective of alevin is more accurate on real data using the
+following migration experiment. The process of dscRNA-seq quantification in alevin happens in multiple 
+phases. After the initial phases of whitelisting and read-mapping, alevin generates an interim 
+file format, we call bfh, which contains the transcript equivalence classes along with their Cellular
+Barcode and UMI count. A major fraction of tier1 estimates comes from unique transcript equivalence
+classes. In our migration experiment, we knocked off (KO) all unique transcript equivalence classes, with
+the expectation that the KO bfh will migrate some of the tier1 and tier2 estimates to tier3, as they have
+may lose the unique information which made them high confidence tiers (tier1 and tier2). 
 
+We take the quantification estimates from pbmc\_4k experiment with 4340 cells and randomly divide it into
+two parts of 2170 cells each, we call 2ka and 2kb experiment. We perform the migration experiment on
+2ka cells and generate alevin EM estimates using KO bfh. Later, we anchors KO 2ka estimates 
+with full 2kb estimates and learn informative priors for KO 2ka estimates to requantify using alevin VBEM
+approach. In ~\Cref{fig:alv2_t3}, we show the cell wise correlaion of KO 2ka experiment using EM and VBEM
+with non KO 2ka experiment. Since the anchoring scheme can't always find high confidence anchors for all 
+cells, we see a bimodal distribution with VBEM approach which signifies the first mode (overlapping 
+with EM mode) are cells with no informative prior while the second mode (with imporved correlation)
+signifies cells with informed prior.
+
+  \begin{figure}[!htb]
+      \centering
+    \includegraphics[width=\linewidth]{alevin2/migration.png}
+    \caption{ We compare the cell wise spearman correlation of EM based alevin with VBEM based
+	prior enhanced alevin.}
+    \label{fig:alv2_t3}
+  \end{figure}
+
+\subsubsection{Experiment on Simulated Data}
 
 \section{Conclusion}
 We proposed a bayesian framework which extends previous generation alevin's maximum likelihood based 
