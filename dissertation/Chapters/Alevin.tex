@@ -191,7 +191,7 @@ reported. In this case, the \alevin UMI deduplication algorithm will correctly d
 \begin{figure*}[!htb]
   \includegraphics[width=\linewidth]{alevin/UMIdedup.pdf}
   \caption{The ratio of the final number of deduplicated
-    UMIs against the number of initial reads for both alevin and Cell Ranger (on the human PBMC 4k dataset)
+    UMIs against the number of initial reads for both \alevin and Cell Ranger (on the human PBMC 4k dataset)
     stratified by gene-level sequence uniqueness. The genes are divided into
     $20$ equal sized bins and the x-axis represents the maximum gene uniqueness
     in each bin. The plotted ratio for genes that have high sequence
@@ -311,7 +311,7 @@ To further assess the accuracy of quantification estimates, in the absence of
         reality, all reads are expected to originate from mouse, deviations from
         quantifications under the only mouse reference signify misestimation ---
         often due to the introduction of sequence-similar genes in the human
-        genome. Alevin is able to resolve this ambiguity well, while \cellr
+        genome. \Alevin is able to resolve this ambiguity well, while \cellr
         instead discards such reads, leading to different quantification estimates
         under the two references. (b) Counts for the topmost genes that have high sequence homology between human 
         and mouse but are sequence unique in the mouse reference. The title of each plot is the gene name 
