@@ -9,34 +9,37 @@
 \section{Background}
 
 RNA-seq quantification has been shown as an important tool to explore the genome-wide
-quantification of the gene expressions for both bulk and single cell RNA-seq experiments.
+quantification of gene expressions for both bulk and single cell RNA-seq experiments.
 DscRNA-seq experiments have been especially useful, as with the advancement in droplet-based 
 sequencing technologies (~\citep{dropseq, indrop, tenx}), it is able to generate data with high 
 quantitative accuracy, sensitivity, and throughput. In ~\Cref{alevin}, we discussed a 
-principled framework for generating cell wise gene-expression estimate given the read sequences
-from a dcsRNA-seq experiment. We showed how discarding gene-multimapping reads by all the other dscRNA-seq quantification pipelines leads to biased expression estimates. 
-Specifically, after the UMI resolution phase, the ambiguous reads with more than 1 gene label are assigned to
-genes based on an expectation-maximization method. Although the framework works well in most of the cases,
-however, in situations where there is no unique read evidence to confidently disambiguate the read assignment
-among the genes, we call tier-3 estimates, the likelihood estimator uniformly divides the reads across the genes in the equivalence class label. In this study we propose the idea of information sharing across closely 
-related cells using bayesian prior for specifically improving the tier-3 estimates. Intuitively speaking, 
-since among the cells with similar cell-types we expect relatively similar gene expression, we propose that 
-sharing information (in the form of expression) across neighboring cells improves the quantification 
-estimates of individual cell. We show that the our idea of information sharing using bayesian 
-prior to improve the quantification can be successfully applied to a dscRNA-seq experiment and improves the 
-quantification estimates.
+principled framework for generating cell-wise gene-expression estimates given the read sequences
+from a dcsRNA-seq experiment. We showed how discarding gene-multimapping reads, typically done 
+by all the existing dscRNA-seq quantification pipelines, leads to biased expression estimates. 
+Specifically, after the UMI resolution phase, we assign the ambiguous reads with more than 1 gene label to
+genes based on an expectation-maximization method. Although the framework works well in most of the cases, 
+in situations where there is no unique read evidence to confidently disambiguate the read assignment
+among genes, which we refer to as tier-3 estimates, the likelihood estimator uniformly divides the reads 
+across the genes in the equivalence class label. In this study we propose the idea of information sharing across closely 
+related cells using bayesian priors for specifically improving these tier-3 estimates. Since we expect cells in an experiment
+to fall into categories of specific cell-types, and cells within a cell-type to have similar expression patterns, we propose that
+sharing information across neighboring cells in the expression space will improve quantification 
+estimates of the individual cells. We show that the our idea of information sharing using bayesian 
+priors to improve quantification can be successfully applied to a dscRNA-seq experiment and results in higher accuracy estimates.
 
 \section{Material and Methods}
 \label{sec:alv2_methods}
 
 \subsection{Variational Bayesian dscRNA-seq quantification}
 Similar to salmon's ~\citep{salmon} collapsed variational bayesian optimization 
-objective our aim is to quantify the expression, given a set of known genes $\mathcal{G}$ and a set
+objective, our aim is to quantify the expression, given a set of known genes $\mathcal{G}$ and a set
 of gene-level equivalence classes with their UMI counts, generated post UMI deduplication using alevin's 
 framework, as $\mathcal{E}$. The previous generation of alevin takes a maximum-likelihood based approach to 
-optimize the gene-level ambiguous read assignment objective, however, it lacks the ability to utilize the 
-confidence from neighboring cells. Since high level of sparsity is an inherant property of a dscRNA-seq
-experiment and due to the random process of capturing the RNA molecule, in expectation, molecule sampling noise wouldn't be uniformly bad across all cells. We expect that sharing the confidence in the expression estimate across cells can be particularly effective in improving the cell-level expression. 
+optimize the gene-level ambiguous read assignment objective. However, it lacks the ability to utilize the 
+confidence from neighboring cells. Since high level of sparsity is an inherent property of a dscRNA-seq
+experiment and due to the random process of capturing RNA molecules, in expectation, molecule 
+sampling noise wouldn't be uniform across all cells. We expect that sharing the confidence in 
+the expression estimates across cells can be particularly effective in improving cell-level expression. 
 
 Salmon is a bulk RNA-seq quantification tool which uses bayesian priors to improve the 
 quantification estimates by its online learning phase. We use the relaxed version of the algorithm 
