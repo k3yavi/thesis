@@ -57,9 +57,9 @@ UMIs $\mathcal{U}$ as follows:
  where $|\mathcal{U}| = N$ is the number of total molecules in the experiment (i.e. the number of 
  deduplicated UMIs ) and $|\mathcal{G}| = M$ is the number of total genes.
  
- In this study we take the Bayesian approach for the gene-expression estimation i.e. instead of 
- seeking the maximum-likelihood estimates we infer the posterior distribution of $\rho$. 
- This posterior distrbution can be defined as:
+In this study we take the Bayesian approach for gene-expression estimation i.e. instead of 
+seeking the maximum-likelihood estimates we infer the posterior distribution of $\rho$. 
+This posterior distribution can be defined as:
 
 \begin{equation}
 	\Pr \{ \rho | \mathcal{U} \mathcal{G} \} 
@@ -68,28 +68,28 @@ UMIs $\mathcal{U}$ as follows:
 \end{equation}
 
 where both $\Pr\{ \mathcal{U} | \mathcal{G} \mathcal{Z} \}$ and $\Pr\{ \mathcal{Z} | \rho \}$ are 
-a data dependant observables and can be estimated as defined in ~\citet{salmon}. The novelty of our method
+data-dependent observables and can be estimated as defined in ~\citet{salmon}. The novelty of our method
 comes with setting the prior term $\Pr\{ \rho \}$, specifically for dscRNA-seq data. We perform
-within sample anchoring using Seurat3 (details in ~\Cref{subsec:anchor}) and use the gene expression
+intra-sample anchoring using Seurat3 (details in ~\Cref{subsec:anchor}) and use the gene expression
 estimates from the nearest cells (with anchoring score >0.5) to generate cell-specific prior.
 
 \subsection{Cellular Barcode Anchoring}
 \label{subsec:anchor}
 In ~\Cref{alevin} we defined tier 3 estimates as specifically the estimates which have reads assigned 
 to gene ambiguous labels and they don't have any uniquely assignable read evidence in their equivalence 
-class network. To disambiguate the gene assignment we use the 
+class network. To disambiguate the gene assignment we use 
 information from the cells with similar type within the sample. To find similar cells for sharing 
 the confidence in their gene expression estimates we use Seurat ~\citep{seurat3} based cellular
 barcode anchoring scheme. In Seurat, ~\citet{seurat3} proposed an anchoring scheme in which they 
 defined a framework to connect two experiments based on the similarity in their cell's gene expression 
-pattern. They first find nearest neighbor using l2 distance of both inter and intra datatsets to generate 
+pattern. They first find nearest neighbor using l2 distance of both inter and intra datasets to generate 
 four distance matrices. Later, they look for the cells which are neighbors to each other in both 
 the directions to define anchors connecting two cells with similar looking expression patterns 
-across different single cell datasets. We use the same anchoring algotihm to connect two similar 
+across different single cell datasets. We use the same anchoring algrotihm to connect two similar 
 cells and define the priors in the bayesian estimation of gene expression.
 
-Anchoring process can sometime generate multi-mapping in both direction, to compensate that we take average 
-of all the neighboring cells which has been chosen as anchor to define the prior. In a typical 4000 single 
+Anchoring process can sometime generate multi-mapping in both directions. To compensate that we take average 
+of all the neighboring cells which have been chosen as anchor to define the prior. In a typical 4000 single 
 cell experiment we run alevin and repeat the Seurat3 anchoring approach $30$ times, randomly dividing 
 the cells into two equal sets and mapping one set onto the other. We discard the self anchors and use 
 anchors with score $>0.5$ as a potential list of neighboring cells to define the priors. This prior 
