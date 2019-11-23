@@ -96,7 +96,7 @@ and allows us to curate a set of oracle alignments for experimental samples.
 
 Finally, we introduce an improved mapping algorithm, selective alignment (\hsa),
 that is designed to remain fast, while simultaneously eliminating many of the
-mapping errors made by lightweight approaches. \hsa is integrated into the \salmon~\cite{salmon}
+mapping errors made by lightweight approaches. \hsa is integrated into the \salmon~\citep{salmon}
 transcript quantification tool. Our proposed method increases
 both the sensitivity and specificity of fast read mapping. It relies upon
 alignment scoring to help differentiate between mapping loci that would
@@ -109,7 +109,7 @@ We also attempt to address one of the failure modes of direct alignment against
   from an unannotated genomic locus bearing sequence-similarity to an annotated
   transcript, it can be falsely mapped to the annotated transcript since the
   relevant genomic sequence is not available to the method. We describe a procedure
-  that makes use of MashMap~\cite{jain2018fast} to identify and extract such
+  that makes use of MashMap~\citep{jain2018fast} to identify and extract such
   sequence-similar \emph{decoy} regions from the genome. The normal \salmon
   index is then augmented with these decoy sequences, which are handled in a
   special manner during mapping and alignment scoring, leading to a reduction in
@@ -130,7 +130,7 @@ following traditional alignment.
 \label{subsec:meth_sa}
 
 Selective alignment is based on the pufferfish indexing data structure first
-described in~\cite{pufferfish}. Moreover, the index is augmented with the
+described in~\citep{pufferfish}. Moreover, the index is augmented with the
 relevant decoy sequence (either restricted decoy sequence as described
 in~\Cref{subsec:meth_decoy} or the entire genome) which is marked during
 indexing and handled in a special manner during alignment scoring.
@@ -150,7 +150,7 @@ mapping. In this final step, information about the decoy sequences is used to
 determine which mappings are considered valid and which are not (details are
 provided below).
 
-In the first phase of the mapping algorithm, uni-MEMs~\cite{debga} are
+In the first phase of the mapping algorithm, uni-MEMs~\citep{debga} are
 collected between the sequenced fragment (with each read end treated
 separately) and the index. The uni-MEMs are found via k-mer lookup, and then
 are extended maximally until the end of a unitig is encountered, the
@@ -182,7 +182,7 @@ underlying uni-MEM terminated. This compaction phase eliminates such
 fragmentation due to uni-MEM termination, and reduces the number of exact
 matches that must be considered by the chaining algorithm. Candidate mapping
 locations are determined by applying the chaining algorithm of
-minimap2~\cite{minimap2} to the exact matches for each transcript passing the
+minimap2~\citep{minimap2} to the exact matches for each transcript passing the
 previous filter. If multiple equally-good positions for a read along a
 transcript, in terms of their chaining score, are discovered, they are all
 propagated downstream in the mapping procedure until mappings for paired-end
@@ -201,11 +201,11 @@ constraints (e.g. that the leftmost position of the reverse complement read
 is to the right of the leftmost position of the forward-strand read, and the
 distances between the reads is less than the maximum allowed insert size). If
 passed the appropriate flag \texttt{--allowDovetails}, then
-dovetailed~\cite{bt2manual} mappings are allowed, but they are prioritized
+dovetailed~\citep{bt2manual} mappings are allowed, but they are prioritized
 below any non-dovetailed mapping.
 
 
-All putative mappings are scored using the ksw2~\cite{minimap2,suzuki2018introducing} library
+All putative mappings are scored using the ksw2~\citep{minimap2,suzuki2018introducing} library
 for alignment extension. We note that we compute only the optimal alignment
 score, and not the details of the alignment itself (i.e.\@ the CIGAR string),
 which improves the speed of this mapping validation. To avoid redundant
@@ -230,7 +230,7 @@ sequence, then all of the fragment's mappings are considered invalid and the
 fragment is not considered for quantification. Otherwise, any alignments to
 decoy sequences are filtered out, and the remaining alignments to valid
 transcripts are further processed by \salmon using range-factorized equivalence
-classes~\cite{ddfact}, which allows the relevant information about the scores
+classes~\citep{ddfact}, which allows the relevant information about the scores
 for the different alignments of the read to be appropriately summarized and used
 for quantification.
 
@@ -239,7 +239,7 @@ for quantification.
 
 \paragraph{A note on the difference between \hsa and \saf}
 This manuscript introduces the idea of selective alignment over a reference sequence 
-indexed using the pufferfish~\cite{pufferfish} data structure, implemented in the \salmon program. The index
+indexed using the pufferfish~\citep{pufferfish} data structure, implemented in the \salmon program. The index
 takes as input a set of decoy sequences, which are not part of the reference transcriptome 
 and are, therefore, not quantified. In our analyses, we considered the performance of the selective alignment 
 algorithm when paired with two different sets of decoys as input. In the first approach, referred to as \hsa in the manuscript, 
@@ -349,7 +349,7 @@ subsequent mapping using quasi-mapping or \hsa\footnote{Though we performed
   performed using the variational Bayesian EM.}.
   
 Where mentioned, the ``strict'' and ``RSEM'' versions of Bowtie2 and STAR refer to these tools
-being run with the flags recommended in the RSEM manual~\cite{rsem_manual},
+being run with the flags recommended in the RSEM manual~\citep{rsem_manual},
 which disallow insertions, deletions and soft-clipping in the resulting
 alignments. The difference between them is that the ``strict'' versions are
 quantified using \salmon and the ``RSEM'' versions using the RSEM expression
@@ -383,7 +383,7 @@ each tool are given in~\Cref{subsec:commands}):
 \subsection{Performance on typical simulations}
 \label{subsec:initial_sim}
 
-We used a Polyester\cite{polyester}-simulated dataset to show the performance
+We used a Polyester\citep{polyester}-simulated dataset to show the performance
 of various methods on synthetic data. The distribution of transcript
 expression for this simulation was learned from an experimental (human) sample
 (\texttt{SRR1033204}, quantified using Bowtie2 with \salmon). We computed the
@@ -456,7 +456,7 @@ others may be larger structural variants. Thus, restricting alignments to disall
 indels seems undesirable, unless one is quantifying
 against a personalized reference that is known to contain the variants present
 in the sample, which can potentially improve the accuracy of transcript
-quantification~\cite{munger2014rna, makemickhappy}.
+quantification~\citep{munger2014rna, makemickhappy}.
 
 \begin{table}[h!]
  \centering
@@ -486,7 +486,7 @@ containing realistic variants compared to the reference, we performed the
 following experiment. We obtained VCF files from the Sanger Mouse Genomes
 website\footnote{\url{ftp://ftp-mouse.sanger.ac.uk/REL-1410-SNPs_Indels/}}
 describing the variants present in the PWK mouse strain. Using
-g2gtools~\cite{g2gtools}, we generated a copy of the GRCm38.91 transcriptome containing
+g2gtools~\citep{g2gtools}, we generated a copy of the GRCm38.91 transcriptome containing
 the variants (including indels) present in the PWK strain and simulated reads
 from this transcriptome. The results presented in the first column
 of~\Cref{tab:mouse} show that when reads are aligned against the PWK strain's
@@ -499,7 +499,7 @@ a negative effect on quantification accuracy.
 
 To further analyze the influence of indels on quantification, we aligned the
 transcript sequences from the PWK strain and the original reference using
-edlib~\cite{vsovsic2017edlib} and counted the total length of indels in each
+edlib~\citep{vsovsic2017edlib} and counted the total length of indels in each
 transcript compared to the unaltered transcript's original length (we refer to
 this quantity as the indel ratio). We then sorted the transcripts in descending
 order by their indel ratios, and evaluated at each cumulative subset, the
@@ -548,7 +548,7 @@ randomly selected 200 human RNA-seq experiments from the NCBI database
 for further investigation. We then filtered the selected samples to include
 only paired-end libraries having a minimum read length of 75bp. After applying
 these filters, we were left with a set of $109$ samples (69 bulk and 40 full-length single-cell). Before further
-processing, we applied adapter and (light) quality trimming using TrimGalore~\cite{trimgalore, cutadapt}\footnote{The effect of trimming on the overall results was
+processing, we applied adapter and (light) quality trimming using TrimGalore~\citep{trimgalore, cutadapt}\footnote{The effect of trimming on the overall results was
 relatively minimal (result not shown).}. We also observed that the overall mapping
 rates across samples tended to be similar between all methods
 (\Cref{fig:mrate}), though Bowtie2 tends to exhibit the highest sensitivity
@@ -713,7 +713,7 @@ Finally, while one would not typically regard any of the
   in the summary correlation. To explore some of the transcripts with large differences
   in quantification across methods, we performed differential transcript
   expression analysis across methods on the $109$ samples, using
-  limma-trend~\cite{law2014voom}. The counts per million (CPM) for the top 100,
+  limma-trend~\citep{law2014voom}. The counts per million (CPM) for the top 100,
   500, and 1000 transcripts is shown in~\Cref{fig:heatmap}. This highlighted the
   divergence of the methods from each other, in terms of quantification and
   revealed clusters of transcripts that were differentially expressed under each
@@ -733,7 +733,7 @@ different methods in the experimental data
 simulations where the transcript expression profile is seeded with the estimated
 abundance results obtained from the experimental samples (using e.g.\@ the
 Bowtie2-derived quantifications).
-To test this hypothesis, we used Polyester~\cite{polyester} to simulate 109
+To test this hypothesis, we used Polyester~\citep{polyester} to simulate 109
 synthetic experiments where the expression profiles in each simulated sample
 were matched to those of the corresponding experimental sample's transcript
 abundances generated by the Bowtie2-based pipeline. 
@@ -832,9 +832,9 @@ other downstream analyses. To show the influence of quantification on DGE, we
 performed a case study on two recently published datasets, where sequencing was
 done for RNA profiling of differences between the healthy and diseased samples. 
 The first dataset is comprised of human ALS motor neurons and studies the effect 
-of the SOD1A4V mutation (2 patient-derived samples) versus (3) isogenic controls (PRJNA236453~\cite{kiskinis2014pathways}). The
+of the SOD1A4V mutation (2 patient-derived samples) versus (3) isogenic controls (PRJNA236453~\citep{kiskinis2014pathways}). The
 second dataset contained $3$ replicates each of uninfected and herpesvirus (HSV-1) infected 
-samples (PRJNA406943~\cite{shi2018deep}). Hence, the design of this study will highlight how
+samples (PRJNA406943~\citep{shi2018deep}). Hence, the design of this study will highlight how
 misquantifications, possibly arising from incorrect alignments, can impact DGE analysis.
 
 
@@ -850,7 +850,7 @@ differential expression. This demonstrated that the quantification issues caused
 by lightweight mapping or misalignment of reads could be of relevance even when
 one is performing gene-level analyses.
 
-The results, visualized using UpSetR~\cite{conway2017upsetr} and presented
+The results, visualized using UpSetR~\citep{conway2017upsetr} and presented
   in~\Cref{fig:dge}, show that lightweight mapping tended to miss the largest number 
   of genes discovered as DE by all other approaches (i.e. the second-largest set in 
   both examples, after the consensus set containing genes found by all approaches, was
@@ -890,11 +890,11 @@ The results, visualized using UpSetR~\cite{conway2017upsetr} and presented
 
 Errors in quantification can impact differential expression analysis not just at the gene level, 
 but at the transcript level as well. To show this impact, we selected a dataset that has recently been 
-used to study the impact of the zika virus on the transcriptome in human neural progenitor cells (PRJNA313294~\cite{tang2016zika}). 
+used to study the impact of the zika virus on the transcriptome in human neural progenitor cells (PRJNA313294~\citep{tang2016zika}). 
 Note that, for consistency, we have used the same design as previous analyses and included both the
 paired-end and single-end datasets. Hence, there are $2$ control and $2$ infected samples under
 each protocol. As with the gene level analysis, the alignment and quantification for all samples was done using the \hsa, \saf, \qm, 
-STAR and Bowtie2 pipelines. Transcript differential expression analysis was done using sleuth~\cite{pimentel2017differential} and 
+STAR and Bowtie2 pipelines. Transcript differential expression analysis was done using sleuth~\citep{pimentel2017differential} and 
 transcripts were called as differentially expressed at an FDR of $0.01$. 
 
 The results are presented in~\Cref{fig:dte} and
@@ -1005,7 +1005,7 @@ While we focused on quantification and differential expression,
 the observations made in this manuscript about the sensitivity
   and accuracy of different alignment approaches may extend to other
 downstream analyses as well, such as trans-acting expression quantitative trait
-locus (eQTL) detection \cite{saha2018false}.
+locus (eQTL) detection \citep{saha2018false}.
 
 Considering only the results on simulated data, one
   might prefer quantification based on alignment or lightweight mapping of
