@@ -16,7 +16,7 @@ Appropriately accounting for the barcode information is therefore crucial for ac
 
 Various methods have been proposed to correctly process \dscrnaseq barcodes in an error-aware manner (``whitelisting'') \citep{bartender, sircel, tenx, dropest, umitools}, to correct sequencing errors in CBs and UMIs \citep{dropest, umitools}, to deduplicate UMI tags inferred to be duplicates \citep{umitools}, and to obtain cell-level gene quantification estimates\citep{scpipe}. 
 
-\begin{table}[!htb]
+\begin{table}[htb]
 \centering
 \caption{The percentage of reads multi-mapping in bulk datasets from human and mouse. We use these datasets for various analyses throughout the chapter. Note that this percentage varies depending on the read length as well as the overall quality of the dataset.}
       \begin{tabular}{cccc}
@@ -38,7 +38,7 @@ Here, we describe an end-to-end quantification pipeline that takes as input samp
 This is a result of both the fact that \dscrnaseq protocols, by construction, display a very strong 3' bias and that these protocols yield effectively single-end reads (only one of the sequenced reads contains sequence from the underlying transcript), resulting in a reduced ability to resolve multimapping using a pair of reads from a longer fragment.
 We show that discarding the multimapping reads can negatively bias the gene-level counts predicted by various methods. Second, existing quantification pipelines combine independent processing algorithms and tools for each step, usually communicating results between pipeline stages via intermediate files on disk, which significantly increases the processing time and memory requirements for the complete analysis. We show that \alevin makes use of more reads than other pipelines, that this leads to more accurate quantification of genes, and that \alevin does this $\sim8$ times faster and with a lower memory requirement, when compared to existing best practice pipelines for \dscrnaseq analysis.
 
-\begin{table}[!htb]
+\begin{table}[htb]
 \centering
 \caption{Percentage of reads multi-mapping across various \scrnaseq samples, using the \alevin mappings.}
       \begin{tabular}{cccc}
@@ -123,9 +123,9 @@ The \alevin program also outputs a tier matrix, of the same dimensions as the ce
 \subsection{Final whitelisting (Optional)}
 \label{sec:final_whitelisting}
 
-Many existing tools for whitelisting CBs, such as \cellr \citep{tenx} and Sircel\citep{sircel} perform whitelisting only once. As discussed above, both tools rely on the assumption that the number of times a CB is observed is sufficient to identify the \emph{correct} CBs, i.e. those originating from droplets containing a cell. However, as observed by Petukhov et al.~\citep{dropest}, there is considerable variation in sequencing depth per-cell, and some droplets may contain damaged or low-quality cells. Thus, true CBs may fall below a simple knee-like threshold. Similarly, erroneous CBs may lie above the threshold. Petukhov et. al~\citep{dropest} proposed that instead of selecting a single threshold, one should treat whitelisting as a classification problem and segregate CBs into three regions; high-quality, low-quality and uncertain / ambiguous. Here, high-quality refers to the CBs which are deemed to be definitely correct, and low-quality are the CBs which are deemed to most likely not arise from valid cells. A classifier can then be trained on the high and low-quality CBs to classify the barcodes in the ambiguous region as either high or low-quality. We adopt this approach in \alevin, using our knee method's cutoff to determine the ambiguous region. Specifically, we divide everything above the knee threshold into two equal regions; high-quality valid barcodes (upper-half), denoted by $\mathcal{H}$, and ambiguous barcodes (lower-half), denoted by $\mathcal{L}$. Since the initial whitelisting procedure is very liberal in selecting a threshold, most of the recoverable, low-confidence CBs tend to reside in the ambiguous region, and to learn the low-quality region, we take $n_l = \max( 0.2 \cdot \left|\mathcal{H}\right|, 1000)$ barcodes just below the knee threshold.
+Many existing tools for whitelisting CBs, such as \cellr \citep{tenx} and Sircel\citep{sircel} perform whitelisting only once. As discussed above, both tools rely on the assumption that the number of times a CB is observed is sufficient to identify the \emph{correct} CBs, i.e. those originating from droplets containing a cell. However, as observed by ~\citet{dropest}, there is considerable variation in sequencing depth per-cell, and some droplets may contain damaged or low-quality cells. Thus, true CBs may fall below a simple knee-like threshold. Similarly, erroneous CBs may lie above the threshold. ~\citet{dropest} proposed that instead of selecting a single threshold, one should treat whitelisting as a classification problem and segregate CBs into three regions; high-quality, low-quality and uncertain / ambiguous. Here, high-quality refers to the CBs which are deemed to be definitely correct, and low-quality are the CBs which are deemed to most likely not arise from valid cells. A classifier can then be trained on the high and low-quality CBs to classify the barcodes in the ambiguous region as either high or low-quality. We adopt this approach in \alevin, using our knee method's cutoff to determine the ambiguous region. Specifically, we divide everything above the knee threshold into two equal regions; high-quality valid barcodes (upper-half), denoted by $\mathcal{H}$, and ambiguous barcodes (lower-half), denoted by $\mathcal{L}$. Since the initial whitelisting procedure is very liberal in selecting a threshold, most of the recoverable, low-confidence CBs tend to reside in the ambiguous region, and to learn the low-quality region, we take $n_l = \max( 0.2 \cdot \left|\mathcal{H}\right|, 1000)$ barcodes just below the knee threshold.
 
-In the implementation of Petukhov et al.\citep{dropest}, a kernel density estimation classifier was trained using features which described the number of reads per UMI, UMIs per gene, the fraction of intergenic reads, non-aligned reads, the fraction of lowly expressed genes and the fraction of UMIs on lowly expressed genes. In addition, a maximum allowable mitochondrial read content was set for a CB to be classified as ``high-quality''. Whilst these features enabled the authors to build a classifier which efficiently separated ``high-quality'' cells from ``low-quality'' cells, we believe it may be possible to improve this set of features. Specifically, most of these features would be expected to correlate with the number of reads or UMIs per CB. Thus, the classifier is biased towards attributes  associated with higher read depth, when in fact one wants it to learn the feature attributes associated with high-quality cells. We therefore used a slightly different set of features, listed below, which we believe may better capture the differences between high and low-quality cells. While these features work in general, they may not be suitable for all analyses and will have to be tweaked accordingly. We chose to use a na\"ive Bayes classifier to perform classification, since we observed no clear difference between multiple ML methods (not shown), and the na\"ive Bayes classifier yields classification probabilities which are easy to interpret. Our final set of whitelisted CBs are those classified as high-confidence.
+In the implementation of \citet{dropest}, a kernel density estimation classifier was trained using features which described the number of reads per UMI, UMIs per gene, the fraction of intergenic reads, non-aligned reads, the fraction of lowly expressed genes and the fraction of UMIs on lowly expressed genes. In addition, a maximum allowable mitochondrial read content was set for a CB to be classified as ``high-quality''. Whilst these features enabled the authors to build a classifier which efficiently separated ``high-quality'' cells from ``low-quality'' cells, we believe it may be possible to improve this set of features. Specifically, most of these features would be expected to correlate with the number of reads or UMIs per CB. Thus, the classifier is biased towards attributes  associated with higher read depth, when in fact one wants it to learn the feature attributes associated with high-quality cells. We therefore used a slightly different set of features, listed below, which we believe may better capture the differences between high and low-quality cells. While these features work in general, they may not be suitable for all analyses and will have to be tweaked accordingly. We chose to use a na\"ive Bayes classifier to perform classification, since we observed no clear difference between multiple ML methods (not shown), and the na\"ive Bayes classifier yields classification probabilities which are easy to interpret. Our final set of whitelisted CBs are those classified as high-confidence.
 
 \begin{enumerate}  
 \item Fraction of reads mapped
@@ -142,12 +142,12 @@ In the implementation of Petukhov et al.\citep{dropest}, a kernel density estima
 \subsection{\Alevin overview}
 There are several steps in the \alevin pipeline that are streamlined to work without the overhead of writing to disk, as highlighted in \Cref{fig:pipeline} (details in Materials and Methods). The first step is to identify the CBs that represent properly-captured and tagged cells (``whitelisting''). \Alevin uses a two-step whitelisting procedure, where the second step takes place at the end of the pipeline. An initial whitelist is produced by finding the ``knee'' in the cumulative distribution of CB frequencies\citep{dropseq, tenx}. For each non-whitelisted CB, \alevin tries to correct it to a whitelisted CB either by a substitution, or a single insertion or deletion. If no such barcode exists in the set of whitelisted barcodes, the barcode and its associated reads are discarded. The next step is mapping reads from the tagged with the whitelisted CBs to a target transcriptome\citep{rapmap,selaln}, followed by UMI deduplication. 
 
-\begin{figure*}[!h]
+\begin{figure}
     \centering
     \includegraphics[width=1\textwidth]{alevin/alevin.pdf}
 \caption{Overview of the \alevin pipeline. The input to the pipeline are sample-demultiplexed \texttt{FASTQ} files and there are several steps, outlined here, that are required to process this data and obtain per cell gene-level quantification estimates. The first step is cell-barcode (CB) whitelisting using their frequencies. Barcodes neighboring whitelisted barcodes are then associated with (collapsed into) their whitelisted counterparts. Reads from whitelisted CBs are mapped to the transcriptome and the UMI-transcript equivalence classes are generated. Each equivalence class contains a set of transcripts, the UMIs that are associated with the reads that map to each class and the read count for each UMI. This information is used to construct a parsimonious UMI graph (PUG) where each node represents a UMI-transcript equivalence class and nodes are connected based on the associated read counts. The UMI deduplication algorithm then attempts to find a minimal set of transcripts that cover the graph (where each consistently-labeled connected component --- each monochromatic arborescence --- is associated with a distinct pre-PCR molecule). In this way, each node is assigned a transcript label, and in turn, an associated gene label. Reads associated with arborescences that could be consistently labeled by multiple genes are divided amongst these possible loci probabilistically based on an expectation-maximization algorithm. Finally, optionally, and if not provided with high quality CB whitelist externally, an intelligent whitelisting procedure finalizes a list of high quality CBs using a na\"ive Bayes classifier to differentiate between high and low-quality cells.}
 \label{fig:pipeline}
-\end{figure*}
+\end{figure}
 
 The process of deduplication requires identifying duplicate reads based on their UMIs and alignment positions along the transcriptome. \Alevin uses a novel algorithm for deduplication that begins by constructing parsimonious UMI graphs, that we refer to as a PUGs, using information from the UMI sequences, the UMI counts and the transcript equivalence classes~\citep{mmseq}. This PUG is constructed such that each UMI-transcript equivalence class pair is represented by a node and there exists an edge from a node to any node that could have arisen from an amplified molecule due to sampling the underlying transcript (a single pre-PCR molecule) at a different position, or via a PCR or a sequencing error being introduced into the UMI.  When the direction of ``duplication'' during PCR is clear, a directed edge is added, otherwise a bi-directed edge is placed. An optimal covering of this graph, using the transcripts associated with each node, will give the minimum number of UMIs, along with their counts, required to explain the set of mapped reads. Hence, we have mapped the deduplication problem to that of finding a minimum cardinality covering of a given graph by monochromatic arborescences. Since the decision version of this problem is NP-complete, we propose a greedy algorithm to obtain a minimum cardinality covering of this graph (proof and algorithm detailed under Materials and Methods). Each covering, and the associated UMI, is assigned a set of transcript labels of size $\geq$ 1. After this UMI resolution phase, the remaining ambiguous reads with more than 1 transcript label, are assigned based on an expectation-maximization method~\citep{salmon}. 
 
@@ -155,14 +155,14 @@ Finally, having obtained per-cell gene expression estimates, CB whitelisting is 
 
 \subsection{Impact of discarding multimapping reads}
 
-\begin{figure*}[!htb]
+\begin{figure}
   \includegraphics[width=\linewidth]{alevin/sims_combine_final.pdf}
   \caption{(a) This figure illustrates examples of various classes of UMI collisions, and which method(s) would be able to correctly resolve 
   the origin of the multimapping reads in each scenario. These cases are shown top-to-bottom in order of their likelihood. (b) A simulated example demonstrates how treating equivalence classes individually during UMI deduplication can lead 
   to under-collapsing of UMIs compared to gene-level methods (especially in protocols where the majority of cDNA amplification occurs 
   prior to fragmentation). In the first row, both methods report correctly a single UMI. In the second row, there are two fragmented molecules aligned against two transcripts from the same gene. The \alevin deduplication algorithm will attempt to choose the minimum number of transcripts required to explain the read mappings and hence correctly detect the UMI counts. The equivalence class method will over-estimate the gene count.}
   \label{fig:collision_sim}
-\end{figure*}
+\end{figure}
 
 Before proceeding with a more detailed analysis of the \alevin pipeline, it is important to highlight scenarios where existing pipelines would fail using simple examples. These also lead to a better understanding of the \alevin UMI deduplication algorithm that intelligently utilizes transcript-level information to obtain accurate gene-level estimates. 
 Since current deduplication methods do not have a mechanism to detect UMIs that map between multiple transcripts of the same gene, they can, in certain cases, incorrectly detect PCR duplicates and hence, under-estimate the total UMI counts. Some obvious cases can be resolved by considering the read-to-transcript mapping, instead of the read-to-gene mapping, as done in \alevin and shown in the left panel in \Cref{fig:collision_sim}.
@@ -188,7 +188,7 @@ However, since the equivalence classes are different, the two fragments sharing 
 Specifically, as the rate of splicing (and hence the number of equivalence classes) increases, so too does the number of distinct UMIs 
 reported. In this case, the \alevin UMI deduplication algorithm will correctly detect the number of transcripts in order to greedily assign the minimum number of transcripts required to explain the given UMI and mapping information.
 
-\begin{figure*}[!htb]
+\begin{figure}
   \includegraphics[width=\linewidth]{alevin/UMIdedup.pdf}
   \caption{The ratio of the final number of deduplicated
     UMIs against the number of initial reads for both \alevin and Cell Ranger (on the human PBMC 4k dataset)
@@ -202,12 +202,12 @@ reported. In this case, the \alevin UMI deduplication algorithm will correctly d
     assign these reads to their gene of origin. This plot also demonstrates that \alevin does not over-count UMIs,
     which would be the case if deduplication was done at the level of equivalence classes.}
   \label{fig:umidedup}
-\end{figure*}
+\end{figure}
 
 To show that the UMI deduplication algorithm from \alevin does, indeed, perform better, we calculate the ratio of the number of reads mapping to each gene and the final count of UMIs as predicted by \alevin and \cellr for that gene. When a read maps ambiguously, the count is divided uniformly between the genes. Hence, if a read maps to two genes, the count for each is incremented by $0.5$ to get the initial number of reads mapping to these genes. Note that the mappings are also different under each pipeline and that some reads may be inherently ambiguous under one or both mappings. These reads cannot be accurately assigned but, while \cellr discards them, \alevin assigns them to a gene via the PUG-resolution algorithm, or,in the case that parsimony fails to distinguish a single best gene, proportionally to multiple genes according to the other uniquely-mapping reads of the experiment.  We divide the genes into 20 bins, based on the number of k-mers shared across genes. We expect the above calculated ratio to remain fairly consistent across these 20 bins, irrespective of the sequence properties of the genes in them. However, we observe in \Cref{fig:umidedup}, that the predictions from \cellr are biased for the genes with low sequence uniqueness. This is because a large number of reads from these genes will multimap across genes and will, therefore, be discarded. Hence, simply discarding multimapping reads seems to bias the count estimates for all genes but strongly impacts counts for genes that are expected to have a larger number of multimapping reads due to their high sequence similarity. 
 
 \subsection{Accuracy analysis on real datasets}
-\begin{table}[!htb]
+\begin{table}[htb]
 \centering
 \caption{Number of final whitelisted cellular barcodes output by \alevin and \cellr.}
       \begin{tabular}{cccc}
@@ -225,12 +225,12 @@ To show that the UMI deduplication algorithm from \alevin does, indeed, perform 
 To assess the performance of \alevin, both in terms of accuracy in quantification and resource consumption, we ran it on 10x Chromium datasets from human and mouse. We compare our results against the \cellr pipeline\citep{tenx}, the \dropest pipeline\citep{dropest} \footnote{Note that we were not able to run the dropEstr Bayesian correction method and the results presented are after running just the \dropest pipeline~\citep{dropseqsrc}.}. , and a custom pipeline, with an external list of whitelisted CBs, using STAR\citep{star}, featureCounts \citep{featurecounts}, and UMI-tools \citep{umitools}, which we refer to as the \naive pipeline. The exact parameters for running each tool are provided under Materials and Methods. Note that we run \alevin with the \texttt{{--}keepDuplicates} flag during indexing, which ensures that even when multiple sequence-identical transcripts exist in the annotation, they are not discarded. This is to allow for fair comparison against the other tools, since they do not discard such transcripts, and the existence of such transcripts will impact the number of multimapping reads. However, we do not generally recommended using this flag when running \alevin. We observe that the number of final whitelisted cells predicted by \alevin are in close proximity to the count of cells predicted by \cellr (and \dropest, since they use the same whitelise), but there are non-trivial differences (\Cref{suptab:whitelist}). Comparison on data using the Drop-seq\citep{dropseq} protocol is also detailed below. Comparisons against the recently released version 3.0.0 of \cellr are also provided (Additional file 1: Figure S1), along with results from another run of \alevin using different parameters. Where mentioned, the results are stratified by gene uniqueness which is the proportion of k-mers, of size 31, that are not shared between two or more genes. We note that varying the k-mer size changes the stratification of the genes but does not impact the overall correlation and performance of the methods. We show this for the mouse neuronal 900 dataset (Additional file 1: Figure S2). We calculated this for each gene in the human (GENCODE release 27, GRCh38.p10) and mouse (GENCODE release M16, GRCm38.p5) transcriptomes. Note that this was not calculated using the canonicalized k-mers from the genes. This is because the \scrnaseq protocols are stranded and a read, therefore, can not multi-map between two genes if the reverse complement of one of them is shared with the other's forward sequence. 
 
 \subsection{Accuracy of estimates against bulk data}
-\begin{table}[!htb]
+\begin{table}[htb]
 \centering
 \caption{Average Spearman correlation of gene-level estimates from each method for the single cell datasets against bulk data from the same cell types (4 for human, 3 for mouse).}
       \begin{tabular}{ccccc}
         \hline
-           Dataset & \Alevin & \cellr & \naive & DropEst \\ \hline
+           Dataset & \Alevin & \cellr & \naive & \dropest \\ \hline
            Human PBMC 4k & 0.813 & 0.780 & 0.747 & 0.783 \\
            Human PBMC 8k & 0.810 & 0.772 & 0.740 & 0.776 \\
            Mouse Neurons 900 & 0.812 & 0.773 & 0.761 & 0.779 \\
@@ -242,14 +242,14 @@ To assess the performance of \alevin, both in terms of accuracy in quantificatio
 
 To test the accuracy of the quantification estimates, we aggregate the estimates from each of the single-cell quantification tools (summing across all cells) and calculate the correlation with estimates predicted by RSEM\citep{li2011rsem} (paired with Bowite2\citep{bowtie2} alignments) using bulk datasets from the same cell types. While the differences between single-cell and bulk sequencing protocols and techniques are significant, we believe that, in the absence of established benchmarks, the correlation between them is a reasonable indicator of the accuracy of each quantification method. Estimates from \alevin, when summed across all cells, have a higher Spearman rank correlation than the \cellr, \dropest, and \naive pipelines (\Cref{suptab:fullcorr}).  Specifically, we posit that the methods demonstrate a strong and persistent bias against groups of two or more genes that exhibit high sequence similarity.  That is, the more sequence-similar a gene is to another gene, the less likely these pipelines are able to assign reads to it --- in the extreme case, some genes essentially become \emph{invisible} due to the \emph{in silico} biases of these approaches (a similar effect was reported by Robert and Watson ~\citep{makemickhappy} in bulk RNA-seq data when simple read-counting approaches are used for quantification, where they highlight that many such genes are relevant to human disease).
 
-\begin{figure*}
+\begin{figure}
 \centering
     \includegraphics[width=\linewidth]{alevin/combine_corr.pdf}
   \caption{(a) The Spearman correlation between quantification estimates (summed across all cells) from different \scrnaseq methods against bulk data from the mouse neuronal and human PBMC datasets, stratified by gene sequence uniqueness. The bar plot on the top of each figure shows the percentage of genes in each bin that have unique read evidence. Tier 1 is the set of genes with only uniquely mapping reads. Tier 2 is genes that have ambiguously mapping reads, but are connected to unique read evidence that can be used to resolve the multimapping reads. Tier 3 is  genes that are completely ambiguous. Note that all methods perform very similarly on genes from tier 1, but the performance of \alevin is much better for the other tiers. (b) Comparison of various methods used to process dropseq data from mouse retina with 4k cells. The Spearman correlation is calculated against bulk quantification estimates predicted using Bowtie2 and RSEM on data from the same cell type.}
   \label{fig:correlation}
-\end{figure*}
+\end{figure}
 
-\begin{table}[!htb]
+\begin{table}[htb]
 \centering
 \caption{Number of genes in each bin, when stratified by gene uniqueness.}
       \begin{tabular}{ccc}
@@ -271,13 +271,13 @@ To test the accuracy of the quantification estimates, we aggregate the estimates
 
 To further explore this hypothesis, we stratified the accuracy of the different methods by the uniqueness of the underlying genes (\Cref{fig:correlation}a, \Cref{suptab:bin_sizes}). The bar plots at the top of each subfigure represent the tiers of the genes as assigned by \alevin. Tier 1 is the set of genes where all the reads are uniquely mapping. Tier 2 is genes that have ambiguously mapping reads, but connected to unique read evidence as well, that can be used by the EM to resolve the multimapping reads. Tier 3 is the genes that have no unique evidence and the read counts are, therefore, distributed between these genes according to an uninformative prior. In agreement with the hypothesized relationship, we observed that the higher accuracy of \alevin is particularly large for genes with a lower proportion of unique k-mers, that tend to belong to tier 2 or 3. On genes from tier 1, all the methods to perform similarly. Thus, the approach of \cellr, \dropest, and \naive, which discard reads mapping to multiple genes, results in systematic inaccuracies in genes which are insufficiently unique (i.e. which share a high degree of sequence homology with some other gene). 
 
-\begin{figure*}[!htb]
+\begin{figure}
   \includegraphics[width=\linewidth]{alevin/hbgene.pdf}
   \caption{Expression of the Hba and Hbb genes as predicted by \alevin and \cellr in mouse neuronal cells. The title of each plot is the name of the gene and its k-mer uniqueness ratio. Note that \cellr systematically underestimates the expression of these genes compared to \alevin. This bias is greater for the Hba genes, which have a lower uniqueness ratio, and therefore, a greater number of multi-mapping reads.}
   \label{fig:hbgene}
-\end{figure*}
+\end{figure}
 
-\begin{figure}[!htb]
+\begin{figure}
     \centering
   \includegraphics[width=0.3\linewidth]{alevin/yipf6gene.pdf}
   \caption{Expression of the YIPF6 gene (which has a high uniqueness ratio) as predicted by \alevin and \cellr in the PBMC8k data.}
@@ -301,7 +301,7 @@ To further assess the accuracy of quantification estimates, in the absence of
   sequence ambiguity, due to the presence of homologous genes, resulting in
   misestimation. 
   
-  \begin{figure}[!htb]
+  \begin{figure}
       \centering
     \includegraphics[width=\linewidth]{alevin/mixed_combine.pdf}
     \caption{(a) Histogram of the $\ell_{1}$ distance between the
@@ -348,14 +348,14 @@ To further assess the accuracy of quantification estimates, in the absence of
   \cellr expression estimates vary much more than those from \alevin.
 
 \subsection{Time and memory efficiency}
-The time and memory requirements for \alevin are significantly less than those for the existing pipelines (\Cref{fig:timemem}), where all methods were run using $16$ threads. DropEst is excluded from the figure since it consumes the BAM file output by \cellr and is not a complete end-to-end pipeline. For the smallest dataset (900 mouse neuronal cells), \alevin was $\sim5$ times faster than \naive and $\sim21$ times faster than \cellr. This difference increases further as the size of the dataset increases, since the performance of \alevin scales better than the other tools. Hence, where \alevin took only $70$ minutes to process the human PBMC 8k dataset, \cellr took $22$ hours and \naive took $11$ hours. On this dataset, \dropest took $\sim2$ hours, after \cellr was used to process and align the reads. In terms of memory, \alevin used only $\sim13$GB on the human PBMC 8k cell dataset, whereas \naive took $\sim20$GB and \dropest took $\sim32$GB. For the mouse neuronal 9k cell dataset, \alevin used $\sim14$GB, \naive  $\sim18$GB, and \dropest $\sim52$GB. In both cases, \cellr required a minimum of 16GB just for STAR indexing. We note that \cellr allows the user to specify a maximum resident memory limit, and we ran \cellr allowing it to allocate up to 120GB so that the extra runtime was not due to limitations in available memory. We also note that for \dropest, we were not able to run the Bayesian collision correction algorithm implemented in dropEstr; however, given the relatively long UMI tags employed in chromium V2 chemistry compared to inDrop, one would expect the effect of this extra phase to be limited anyway.
+The time and memory requirements for \alevin are significantly less than those for the existing pipelines (\Cref{fig:timemem}), where all methods were run using $16$ threads. \dropest is excluded from the figure since it consumes the BAM file output by \cellr and is not a complete end-to-end pipeline. For the smallest dataset (900 mouse neuronal cells), \alevin was $\sim5$ times faster than \naive and $\sim21$ times faster than \cellr. This difference increases further as the size of the dataset increases, since the performance of \alevin scales better than the other tools. Hence, where \alevin took only $70$ minutes to process the human PBMC 8k dataset, \cellr took $22$ hours and \naive took $11$ hours. On this dataset, \dropest took $\sim2$ hours, after \cellr was used to process and align the reads. In terms of memory, \alevin used only $\sim13$GB on the human PBMC 8k cell dataset, whereas \naive took $\sim20$GB and \dropest took $\sim32$GB. For the mouse neuronal 9k cell dataset, \alevin used $\sim14$GB, \naive  $\sim18$GB, and \dropest $\sim52$GB. In both cases, \cellr required a minimum of 16GB just for STAR indexing. We note that \cellr allows the user to specify a maximum resident memory limit, and we ran \cellr allowing it to allocate up to 120GB so that the extra runtime was not due to limitations in available memory. We also note that for \dropest, we were not able to run the Bayesian collision correction algorithm implemented in dropEstr; however, given the relatively long UMI tags employed in chromium V2 chemistry compared to inDrop, one would expect the effect of this extra phase to be limited anyway.
 
-\begin{figure*}[!htb]
+\begin{figure}
     \centering
   \includegraphics[width=\linewidth]{alevin/timing.pdf}
   \caption{The time and memory performance of the different pipelines on the five datasets. \Alevin requires significantly less time and memory than the other pipelines. Note that for \cellr, the memory plotted is the lower bound, which is the size of the index and the actual memory usage can be much higher.} %(b) The time and memory usage of \alevin using different number of threads. The runs for each dataset were repeated using $5, 10, 15,$ and, $20$ threads.}
   \label{fig:timemem}
-\end{figure*}
+\end{figure}
 
 We observe that the optimal number of threads for running \alevin is $10-12$, where the maximum gain in terms of time and memory is achieved. \Alevin is designed to make efficient use of multiple threads, though the optimal number of threads can depend on many factors, such as the speed of the underlying disk and the size of the raw input and output matrix to be written. While runtime decreases with the number of threads uses, the memory profile changes very little as threads are added. 
 

@@ -312,6 +312,7 @@ KOMA-script documentation for details.}]{fancyhdr}
 \newcommand{\cellr}{\texttt{Cell-Ranger}\xspace}
 \newcommand{\naive}{\textit{na\"ive}\xspace}
 \newcommand{\scrnaseq}{scRNA-seq\xspace}
+\newcommand{\singlecell}{single-cell\xspace}
 \newcommand{\dscrnaseq}{\texttt{dscRNA-seq}\xspace}
 \newcommand{\kbpipe}{\texttt{kb-pipe}\xspace}
 \newcommand{\dropest}{\texttt{dropEst}\xspace}

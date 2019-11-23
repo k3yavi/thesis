@@ -14,15 +14,15 @@
 
 In the following sections, we give a brief overview of the efficient computational 
 methods this study presents which improve the quantification of both bulk and dscRNA-seq 
-data alongs with some of the supplementary work and the future directions.
+data along with some of the supplementary work and the future directions.
 
 \section{Bulk RNA-seq}
 
 In ~\Cref{rapmap} we discuss the usefulness of our novel approach, \qm, 
 for mapping RNA-seq reads. We show our efficient implementation of \qm, in the 
 form of \rapmap is fast, accurate and addresses an important problem of read-mapping.
-In ~\Cref{selective_alignment} we discuss the extention of our \qm approach into
-\hsa, we discuss the pitfalls of using only simulated dataset for validating 
+In ~\Cref{selective_alignment} we discuss the extension of our \qm approach into
+\hsa, we discuss the pitfalls of using only the simulated dataset for validating 
 computational methods and how including genomic alignment as decoys for the
 transcriptomic alignment improves the performance of transcript abundance estimation.
 In addition to that, we are reaching out to find other biological applications where 
@@ -44,7 +44,7 @@ classes of fragments that map to subsets of the transcriptome. Leveraging recent
 in efficient read mapping and transcript quantification, we have developed RapClust, a tool 
 implementing this approach that is capable of accurately clustering most large de novo 
 transcriptomes in a matter of minutes, while simultaneously providing accurate estimates of 
-expression for the resulting clusters. We compare RapClust against a number of tools commonly 
+expression for the resulting clusters. We compare RapClust against several tools commonly 
 used for de novo transcriptome clustering. Using de novo assemblies of organisms for which 
 reference genomes are available, we assess the accuracy of these different methods in terms of 
 the quality of the resulting clusterings, and the concordance of differential expression tests 
@@ -62,12 +62,12 @@ of reads. Further, \alevin is considerably faster and uses less memory than
 these other approaches. The optimizations used in \alevin makes it possible to 
 efficiently process \dscrnaseq datasets in a reduced computational burden for 
 processing and re-processing of \dscrnaseq data. 
-In ~\cref{alevin2}, we present the extention of \alevin into using a bayesian
+In ~\cref{alevin2}, we present the extension of \alevin into using a bayesian
 approach for solving the expectation-maximization objective. We show the new
 approach is specifically useful for tier3 (high ambiguous) estimates and 
 significantly improves the cell-wise gene expression estimates by sharing 
 the information across cells. In addition to that, we are reaching out to 
-find other single cell platforms where \alevin can be useful. 
+find other \singlecell platforms where \alevin can be useful. 
 In the following section, we discuss some of the applications, which we have worked on, 
 or are currently working.
 
