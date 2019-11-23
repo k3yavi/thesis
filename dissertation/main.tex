@@ -100,7 +100,7 @@ headsepline, % Uncomment to get a line under the header
 % Your thesis title, this is used in the title and abstract, print it elsewhere with \ttitle
 \supervisor{Rob Patro}  % Your supervisor's name, this is used in the title page, print it elsewhere with \supname
 \examinerO{Michael Bender} % Your examiner's name, this is not currently used anywhere in the template, print it elsewhere with \examname
-\examinerTh{Steve Skiena} % Your examiner's name, this is not currently used anywhere in the template, print it elsewhere with \examname
+\examinerTh{Steven Skiena} % Your examiner's name, this is not currently used anywhere in the template, print it elsewhere with \examname
 \examinerJr{Joshua Rest} % Your examiner's name, this is not currently used anywhere in the template, print it elsewhere with \examname
 \degree{Doctor of Philosophy} % Your degree name, this is used in the title page and abstract, print it elsewhere with \degreename
 \author{Avi Srivastava} % Your name, this is used in the title page and abstract, print it elsewhere with \authorname
@@ -264,14 +264,13 @@ the inherent bias in existing tools which discard gene-ambiguous reads and impro
 accuracy of gene abundance estimates. Alevin is considerably faster, typically 8 times  
 than existing gene-quantification approaches, while also using less memory.
 
-Finally, we propose to generalize both methods to make them more robust and extend their capabilities. 
-While \qm is a useful novel concept, it trades-off some accuracy for speed. This does not have a huge
-impact on typical RNA-seq experiments. However, in \textit{relatively} complex datasets, the loss in accuracy 
-can be significant. In ongoing work, we have updated \rapmap to employ alignments to improve 
-quantifications in an efficient, dynamic (dataset dependent) way. This optimizes the
-speed/accuracy tradeoff, making the estimates almost as accurate as end-to-end alignment-based
-methods, while still using resources similar to \rapmap. Moreover, we propose a principled approach and 
-study the effect of further extending \alevin's UMI deduplication algorithm to include unspliced RNA.
+Finally, we generalize both methods to make them more robust and extend their capabilities. 
+While \qm is a useful novel concept, it trades-off some accuracy for speed. In \textit{relatively} complex 
+datasets, the loss in accuracy can be significant. We have updated \rapmap to employ alignments to improve 
+quantifications in an efficient, dynamic (dataset dependent) way. This optimizes the speed/accuracy tradeoff, 
+making the estimates almost as accurate as end-to-end alignment-based methods, while still using resources 
+similar to \rapmap. Moreover, we propose a principled approach and study the effect of further extending 
+\alevin's framework by optimizing the variational bayesian objective.
 \newpage
 
 % \end{abstract}
@@ -357,10 +356,13 @@ Charlotte Soneson, Geet Duggal, Richard Smith-Unna, Owen Dando, Darya Filipova, 
 and Paul Ryvkin for their insightful discussions regarding various aspects of the work.
 
 I can't thank my family enough for their support throughout my journey of learning. 
-Especially my father, Y K Srivastava, who guided me from my childhood to learn actively and motivated me 
-to think out-of-the-box. I'd like to thank my mother Ritima Srivastava, brother Prakhar Srivastava,
+Especially my father, Y K Srivastava, who guided me from my childhood to learn actively and motivated 
+me to think out-of-the-box. I'd like to thank my mother Ritima Srivastava, brother Prakhar Srivastava,
 late grandparents, Govind Prasad Srivastava, Savitri Srivastava, and all my cousins
- for providing a comfortable and loving environment for me while growing up. 
+for providing a comfortable and loving environment for me while growing up. And finally, 
+my partner, Renu, who stood with me through all the hardship of the grad life and reminding me
+there is more to life than my research.
+
 
 At last, I would also like to thank Stony Brook Research Computing and 
 Cyberinfrastructure, and the Institute for Advanced Computational Science at Stony Brook 
