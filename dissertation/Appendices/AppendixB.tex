@@ -10,13 +10,17 @@ The GENCODE v29 Human reference from
 \url{https://www.gencodegenes.org/human/release_29.html} was used for all
 experiments involving (simulated or experimental) human reads. The mouse
 reference genome was obtained from
-\url{ftp://ftp.ensembl.org/pub/release-91/fasta/mus_musculus/dna/Mus_musculus.GRCm38.dna.toplevel.fa.gz}
-and the GTF was obtained from
-\url{ftp://ftp.ensembl.org/pub/release-91/gtf/mus_musculus/Mus_musculus.GRCm38.91.gtf.gz}.
+\href{ftp://ftp.ensembl.org/pub/release-91/fasta/mus_musculus/dna/Mus_musculus.GRCm38.dna.toplevel.fa.gz}
+{ensembl}
+and the GTF was also obtained from
+\href{ftp://ftp.ensembl.org/pub/release-91/gtf/mus_musculus/Mus_musculus.GRCm38.91.gtf.gz}
+{ensembl}.
 The VCF files for the SNPs and indels were obtained from
-\url{ftp://ftp-mouse.sanger.ac.uk/REL-1410-SNPs_Indels/mgp.v4.snps.dbSNP.vcf.gz}
+\href{ftp://ftp-mouse.sanger.ac.uk/REL-1410-SNPs_Indels/mgp.v4.snps.dbSNP.vcf.gz}
+{sanger}
 and
-\url{ftp://ftp-mouse.sanger.ac.uk/REL-1410-SNPs_Indels/mgp.v4.indels.dbSNP.vcf.gz}
+\href{ftp://ftp-mouse.sanger.ac.uk/REL-1410-SNPs_Indels/mgp.v4.indels.dbSNP.vcf.gz}
+{sanger}
 respectively. The list of 109 SRR, scripts to simulate synthetic reads, and the fasta
 and true abundance files for 10 replicates of simulated data (gencode for human
 and PWK for mouse) can be found at
@@ -38,7 +42,8 @@ using BedTools~\citep{quinlan2010bedtools} and concatenated, giving a decoy
 sequence for each chromosome. These decoys were then included during the
 \salmon indexing phase, as described below. A script to obtain these decoy
 sequences for any reference, given the genome, transcriptome, and annotation
-is available at: \url{https://github.com/COMBINE-lab/SalmonTools/blob/master/scripts/generateDecoyTranscriptome.sh}.
+is available at: \href{https://github.com/COMBINE-lab/SalmonTools/blob/master/scripts/generateDecoyTranscriptome.sh}{
+https://github.com}.
 
 \section{Tools}
 \label{subsec:commands}
@@ -92,7 +97,7 @@ index and threads, with each tools we compare against:
 	--quantMode TranscriptomeSAM --outSAMattributes NH HI AS NM MD
 	--quantTranscriptomeBan IndelSoftclipSingleend}
 	\item \textbf{RSEM} \texttt{default}
-	\item \textbf{kallisto} \texttt{default} or \texttt{--rf-stranded} as appropriate
+	\item \textbf{\kallisto} \texttt{default} or \texttt{--rf-stranded} as appropriate
 \end{enumerate}
 
 \begin{table}[h!]
@@ -130,15 +135,15 @@ index and threads, with each tools we compare against:
 
 \begin{table}[h!]
  \centering
- \begin{tabular}{ccccccc}
+ \begin{tabular}{cccccc}
    \hline
-         & Oracle & Bowtie2 & SAF & \hsa & quasi & STAR\\ \hline
- Oracle & 1.000/0.000 & $\numprint{0.858495}$/$\numprint{0.053736}$ & $\numprint{0.919992}$/$\numprint{0.028552}$ & $\numprint{0.873352}$/$\numprint{0.045867}$& $\numprint{0.843022}$/$\numprint{0.053193}$& $\numprint{0.889439}$/$\numprint{0.039311}$\\
- Bowtie2 & -- & 1.000/0.000 & $\numprint{0.817429}$/$\numprint{0.063481}$ & $\numprint{0.863387}$/$\numprint{0.038621}$ & $\numprint{0.783076}$/$\numprint{0.067582}$ & $\numprint{0.790747}$/$\numprint{0.068541}$ \\
- SAF & -- & -- & 1.000/0.000 & $\numprint{0.906522}$/$\numprint{0.052332}$ & $\numprint{0.864903}$/$\numprint{0.049687}$ & $\numprint{0.909014}$/$\numprint{0.023030}$\\
- \hsa & -- & -- & -- & 1.000/0.000 & $\numprint{0.829317}$/$\numprint{0.063462}$ & $\numprint{0.836573}$/$\numprint{0.058815}$ \\
- quasi &  -- & --  & -- & -- & 1.000/0.000 & $\numprint{0.858436}$/$\numprint{0.052212}$\\
- STAR &  -- & --  & -- & -- & -- & 1.000/0.000 \\
+         & Bowtie2 & SAF & \hsa & quasi & STAR\\ \hline
+ Oracle & $\numprint{0.858495}$/$\numprint{0.053736}$ & $\numprint{0.919992}$/$\numprint{0.028552}$ & $\numprint{0.873352}$/$\numprint{0.045867}$& $\numprint{0.843022}$/$\numprint{0.053193}$& $\numprint{0.889439}$/$\numprint{0.039311}$\\
+ Bowtie2 & 1.000/0.000 & $\numprint{0.817429}$/$\numprint{0.063481}$ & $\numprint{0.863387}$/$\numprint{0.038621}$ & $\numprint{0.783076}$/$\numprint{0.067582}$ & $\numprint{0.790747}$/$\numprint{0.068541}$ \\
+ SAF & -- & 1.000/0.000 & $\numprint{0.906522}$/$\numprint{0.052332}$ & $\numprint{0.864903}$/$\numprint{0.049687}$ & $\numprint{0.909014}$/$\numprint{0.023030}$\\
+ \hsa & -- & -- & 1.000/0.000 & $\numprint{0.829317}$/$\numprint{0.063462}$ & $\numprint{0.836573}$/$\numprint{0.058815}$ \\
+ quasi & --  & -- & -- & 1.000/0.000 & $\numprint{0.858436}$/$\numprint{0.052212}$\\
+ STAR & --  & -- & -- & -- & 1.000/0.000 \\
  \hline
 \end{tabular}
  \caption{Mean/standard deviation of Spearman correlation between all methods on $40$ single-cell experimental datasets after 
@@ -148,15 +153,15 @@ index and threads, with each tools we compare against:
 
 \begin{table}[h!]
  \centering
- \begin{tabular}{ccccccc}
+ \begin{tabular}{cccccc}
    \hline
-         & Oracle & Bowtie2 & SAF & \hsa & quasi & STAR\\ \hline
- Oracle & 1.000/0.000 & $\numprint{0.949207}$/$\numprint{0.022744}$ & $\numprint{0.970706}$/$\numprint{0.008334}$ & $\numprint{0.954241}$/$\numprint{0.013979}$& $\numprint{0.907292}$/$\numprint{0.031031}$& $\numprint{0.962499}$/$\numprint{0.012450}$\\
- Bowtie2 & -- & 1.000/0.000 & $\numprint{0.940024}$/$\numprint{0.026027}$ & $\numprint{0.961004}$/$\numprint{0.017293}$ & $\numprint{0.901297}$/$\numprint{0.034042}$ & $\numprint{0.919557}$/$\numprint{0.025325}$ \\
- SAF & -- & -- & 1.000/0.000 & $\numprint{0.971655}$/$\numprint{0.015035}$ & $\numprint{0.913026}$/$\numprint{0.030584}$ & $\numprint{0.954660}$/$\numprint{0.011279}$\\
- \hsa & -- & -- & -- & 1.000/0.000 & $\numprint{0.913908}$/$\numprint{0.028960}$ & $\numprint{0.932170}$/$\numprint{0.016787}$ \\
- quasi &  -- & --  & -- & -- & 1.000/0.000 & $\numprint{0.903269}$/$\numprint{0.029167}$\\
- STAR &  -- & --  & -- & -- & -- & 1.000/0.000 \\
+         & Bowtie2 & SAF & \hsa & quasi & STAR\\ \hline
+ Oracle & $\numprint{0.949207}$/$\numprint{0.022744}$ & $\numprint{0.970706}$/$\numprint{0.008334}$ & $\numprint{0.954241}$/$\numprint{0.013979}$& $\numprint{0.907292}$/$\numprint{0.031031}$& $\numprint{0.962499}$/$\numprint{0.012450}$\\
+ Bowtie2 & 1.000/0.000 & $\numprint{0.940024}$/$\numprint{0.026027}$ & $\numprint{0.961004}$/$\numprint{0.017293}$ & $\numprint{0.901297}$/$\numprint{0.034042}$ & $\numprint{0.919557}$/$\numprint{0.025325}$ \\
+ SAF & -- & 1.000/0.000 & $\numprint{0.971655}$/$\numprint{0.015035}$ & $\numprint{0.913026}$/$\numprint{0.030584}$ & $\numprint{0.954660}$/$\numprint{0.011279}$\\
+ \hsa & -- & -- & 1.000/0.000 & $\numprint{0.913908}$/$\numprint{0.028960}$ & $\numprint{0.932170}$/$\numprint{0.016787}$ \\
+ quasi & --  & -- & -- & 1.000/0.000 & $\numprint{0.903269}$/$\numprint{0.029167}$\\
+ STAR & --  & -- & -- & -- & 1.000/0.000 \\
  \hline
 \end{tabular}
  \caption{Mean/standard deviation of Spearman correlation between all methods on $69$ bulk experimental datasets after 
