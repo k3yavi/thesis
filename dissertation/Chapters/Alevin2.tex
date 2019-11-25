@@ -67,24 +67,24 @@ This posterior distribution can be defined as:
     \cdot \Pr\{ \mathcal{Z} | \rho \} \cdot \Pr\{ \rho \}
 \end{equation}
 
-where both $\Pr\{ \mathcal{U} | \mathcal{G} \mathcal{Z} \}$ and $\Pr\{ \mathcal{Z} | \rho \}$ are 
+where both $\Pr\{ \mathcal{U} | \mathcal{G}, \mathcal{Z} \}$ and $\Pr\{ \mathcal{Z} | \rho \}$ are 
 data-dependent observables and can be estimated as defined in ~\citet{salmon}. The novelty of our method
-comes with setting the prior term $\Pr\{ \rho \}$, specifically for \dscrnaseq data. We perform
+comes with setting the prior term $\Pr\{ \rho \}$ specifically for \dscrnaseq data. We perform
 intra-sample anchoring using Seurat3 (details in ~\Cref{subsec:anchor}) and use the gene expression
 estimates from the nearest cells (with anchoring score >0.5) to generate cell-specific prior.
 
 \subsection{Cellular Barcode Anchoring}
 \label{subsec:anchor}
-In ~\Cref{alevin} we defined tier 3 estimates as specifically the estimates which have reads assigned 
+In~\Cref{alevin} we defined tier 3 estimates as specifically the estimates which have reads assigned 
 to gene ambiguous labels and that don't have any uniquely assignable read evidence in their equivalence 
-class network. To disambiguate the gene assignment we use 
-information from the cells with similar global expression profile within the sample. To find similar cells for sharing 
-the confidence in their gene expression estimates we use Seurat's ~\citep{seurat3} cellular
-barcode anchoring scheme. In Seurat, ~\citet{seurat3} proposed an anchoring scheme in which they 
+class network. To disambiguate the gene assignment, we use 
+information from cells with similar global expression profile within the sample. To find similar cells for sharing 
+the confidence in their gene expression estimates we use Seurat's~\citep{seurat3} cellular
+barcode anchoring scheme. In Seurat,~\citet{seurat3} proposed an anchoring scheme in which they 
 defined a framework to connect two experiments based on the similarity in their cell's gene expression 
 pattern. They first find the nearest neighbor using l2 distance of both inter and intra datasets to generate 
-four distance matrices. Later, they look for the cells which are neighbors to each other in both 
-the directions to define anchors connecting two cells with similar looking expression patterns 
+four distance matrices. Later, they look for cells which are neighbors to each other in both 
+directions to define anchors connecting two cells with similar looking expression patterns 
 across different \singlecell datasets. We use the same anchoring algorithm to connect two similar 
 cells and define the priors in the Bayesian estimation of gene expression.
 
@@ -92,8 +92,9 @@ The anchoring process can sometimes generate multi-mapping in both directions. T
 average of all the neighboring cells which have been chosen as the anchor to define the prior. In a typical 4000 \singlecell 
 experiment, we run \alevin and repeat the Seurat3 anchoring approach $30$ times, randomly dividing 
 the cells into two equal sets and mapping one set onto the other. We use anchors with score $>0.5$ as a potential list 
-of neighboring cells to define the priors. This prior is then used to optimize the quantification estimates of genes with multi-mapping reads in the \alevin pipeline. As a proof-of-concept, we use the prior with only the tier 3 
-estimates, while keeping the uniform prior for both tier 1 and tier 2 estimates.
+of neighboring cells to define the priors. This prior is then used to optimize the quantification estimates of genes 
+with multi-mapping reads in the \alevin pipeline. As a proof-of-concept, we use the prior with only tier 3 estimates, 
+while keeping uniform prior for both tier 1 and tier 2 estimates.
 
 \section{Results}
 One fundamental property of \dscrnaseq experiments is that molecules are randomly captured across cells 
@@ -109,12 +110,12 @@ confidence in their gene estimates.
     \label{fig:alv2_t3}
 \end{figure}
 
-In ~\Cref{alevin}, we categorize the confidence in the generated gene counts estimates using tiers. 
-Even though, we show the \alevin generated quantification estimates are accurate, however, the confidence 
-in tier 3 assigned estimates is low and often the source of the mis-estimation.In \Cref{fig:alv2_t3} we show the 
+In~\Cref{alevin}, we categorize the confidence in the generated gene counts estimates using tiers. 
+Even though we show that the \alevin generated quantification estimates are accurate, the confidence 
+in tier 3 assigned estimates is low and often a source of mis-estimation. In~\Cref{fig:alv2_t3} we show the 
 distribution of genes with the fraction of cells that have tier 3 estimates. This motivates our idea that to improve 
-the expression estimates of the tier 3 genes, we can utilize the independent sampling of neighboring cells and share 
-information across them to improve gene-level estimates (details in ~\Cref{sec:alv2_methods}).
+the expression estimates of tier 3 genes, we can utilize the independent sampling of neighboring cells and share 
+information across them to improve gene-level estimates (details in~\Cref{sec:alv2_methods}).
 
 \subsection{Variational Bayesian Estimation with Informative Priors Improves \dscrnaseq quantification}
 Over the years, with the advancement in \singlecell technologies, various \singlecell quantification 
@@ -124,46 +125,46 @@ comparing gene-expression estimates generated by the various pipelines has been 
 \subsection{Comparing quantification methods on simulated data}
 \label{subsec:alv2_sims}
 
-To compare the gene estimates, we had previously proposed an empirical \dscrnaseq data simulation tool, Minnow 
-~\citep{sarkar2019minnow}. Minnow models various features involved in the generation of the \dscrnaseq data 
+To compare gene estimates, we had previously proposed an empirical \dscrnaseq data simulation tool, 
+Minnow~\citep{sarkar2019minnow}. Minnow models various features involved in the generation of the \dscrnaseq data, 
 like PCR amplification and sequencing errors to generate fastq file with the reads and the expected true cell 
-by gene counts. We used minnow to simulate a \dscrnaseq experiment with 4340 human PBMC cells with $\sim$ 
+by gene counts. We used minnow to simulate a \dscrnaseq experiment with 4340 human PBMC cells with $\sim$
 20 Million UMIs and compared the quantification estimates generated by various methods. We found that, 
 in the simulated data, more than 66\% of the false discoveries made by \alevin are in the tier 3 estimates 
 and due to the inherent problem of sparsity in \dscrnaseq data, we expect a similar pattern of tier 3 genes in 
 the real data as well.
 
-We validated our prior enhanced VBEM approach on simulated data using the minnow generated data (details in
-~\Cref{subsec:alv2_sims}). We first used EM based \alevin on the simulated data to generate quantification
+We validated our prior enhanced VBEM approach on simulated data using the minnow generated data (details in~\Cref{subsec:alv2_sims}). 
+We first used EM based \alevin on the simulated data to generate quantification
 estimates on 4340 cells. We used Seurat's anchoring scheme to self anchor the estimates and generate the
 prior. Using the learned prior we re-quantified the simulated dataset with our VBEM based approach to generate 
-the new estimates. In ~\Cref{fig:alv2_sim_val}, we compare the cell wise correlation of both EM and  VBEM 
+the new estimates. In ~\Cref{fig:alv2_sim_val}, we compare the cell-wise correlation of both EM and  VBEM 
 based approaches to the minnow generated ground truth and observe a higher correlation with VBEM generated
 gene expression estimates.
 
   \begin{figure}[!htb]
       \centering
     \includegraphics[height=3in]{alevin2/sim_corr.pdf}
-    \caption{ Comparison of the cell wise spearman correlation of EM based \alevin with VBEM based
+    \caption{ Comparison of the cell-wise spearman correlation of EM based \alevin with VBEM based
     prior enhanced \alevin on simulated experiment}
     \label{fig:alv2_sim_val}
   \end{figure}
 
 \subsection{Knock Out Experiment on Real Data}
 \label{subsec:alv2_real}
-We validate that the Variational Bayesian estimation of \alevin is more accurate on real data using the
+We validated that the Variational Bayesian estimation of \alevin is more accurate on real data using the
 following knock out (KO) experiment. \Alevin 's pipeline for \dscrnaseq quantification has multiple 
 phases. After the initial phases of whitelisting and read-mapping, \alevin generates an interim 
 file format, called bfh, which contains the transcript equivalence classes along with their Cellular
-Barcode and UMI count. A major fraction of tier1 estimates come from unique transcript equivalence
+Barcode and UMI count. A major fraction of tier 1 estimates come from unique transcript equivalence
 classes. In our KO experiment, we knocked out all unique transcript equivalence classes, with
-the expectation that the KO bfh will migrate some of the tier1 and tier2 estimates to tier 3, as they have
-may lose the unique information which made them high confidence tiers (tier1 and tier2) to start with. 
+the expectation that the KO bfh will migrate some of the tier 1 and tier 2 estimates to tier 3, as they have
+may lose the unique information which made them high confidence tiers (tier 1 and tier 2) to start with. 
 
   \begin{figure}[!htb]
       \centering
     \includegraphics[height=3in]{alevin2/migration.png}
-    \caption{ Comparison of the cell wise spearman correlation of EM based \alevin with  VBEM  based
+    \caption{ Comparison of the cell-wise spearman correlation of EM based \alevin with  VBEM  based
     prior enhanced \alevin on real data KO experiment}
     \label{fig:alv2_real_val}
   \end{figure}
