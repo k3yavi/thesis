@@ -34,7 +34,7 @@ liststotoc, % Uncomment to add the list of figures/tables/etc to the table of co
 %toctotoc, % Uncomment to add the main table of contents to the table of contents
 % parskip, % Uncomment to add space between paragraphs
 % nohyperref, % Uncomment to not load the hyperref package
-headsepline, % Uncomment to get a line under the header
+% headsepline, % Uncomment to get a line under the header
 ]{main} % The class file specifying the document structure
 
 \usepackage[utf8]{inputenc} % Required for inputting international characters
@@ -87,7 +87,7 @@ headsepline, % Uncomment to get a line under the header
     bindingoffset=0cm, % Binding offset
 	left=1in,
 	right=1in,
-    top=1in, % Top margin
+    top=0.5in, % Top margin
     bottom=1in, % Bottom margin
     %showframe,% show how the type block is set on the page
 }
@@ -222,7 +222,7 @@ in\\[0.5cm]
 \renewcommand{\abstractname}{Abstract of the Dissertation}
 \begin{center}
 	\section*{\abstractname}
-	\addchaptertocentry{\abstractname} % Add the abstract to the table of contents
+	% \addchaptertocentry{\abstractname} % Add the abstract to the table of contents
 
 		% Abstract of the Dissertation \\ [0.5cm]
 		\textbf{\ttitle} \\ [0.5cm]
@@ -427,6 +427,14 @@ possible by a National Science Foundation grant (\#1531492).
 %\include{Chapters/Chapter5} 
 
 %----------------------------------------------------------------------------------------
+%    BIBLIOGRAPHY
+%----------------------------------------------------------------------------------------
+\setlength\bibitemsep{1\itemsep}
+\printbibliography[heading=bibintoc]
+
+%----------------------------------------------------------------------------------------
+
+%----------------------------------------------------------------------------------------
 %    THESIS CONTENT - APPENDICES
 %----------------------------------------------------------------------------------------
 
@@ -438,13 +446,5 @@ possible by a National Science Foundation grant (\#1531492).
 \include{Appendices/AppendixA}
 \include{Appendices/AppendixB}
 \include{Appendices/AppendixC}
-
-%----------------------------------------------------------------------------------------
-%    BIBLIOGRAPHY
-%----------------------------------------------------------------------------------------
-
-\printbibliography[heading=bibintoc]
-
-%----------------------------------------------------------------------------------------
 
 \end{document}  

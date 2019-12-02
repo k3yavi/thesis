@@ -223,7 +223,7 @@
 \providepairofpagestyles{thesisSimple}{%
 \clearpairofpagestyles%
 \automark[chapter]{chapter}
-\ihead{\headmark}% Inner header
+%\ihead{\headmark}% Inner header
 \cfoot*{\pagemark}
 }
 \ifoot{}% Inner footer
@@ -473,9 +473,9 @@ bookmarksopen=true,
 bookmarksopenlevel=0,
 hypertexnames=false,
 colorlinks=true, % Set to false to disable coloring links
-citecolor=blue, % The color of citations
-linkcolor=blue, % The color of references to document elements (sections, figures, etc)
-urlcolor=blue, % The color of hyperlinks (URLs)
+citecolor=black, % The color of citations
+linkcolor=black, % The color of references to document elements (sections, figures, etc)
+urlcolor=black, % The color of hyperlinks (URLs)
 pdfstartview={FitV},
 unicode,
 breaklinks=true,
